@@ -1,0 +1,2069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeShadow — Your AI Trading Shadow</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+:root {
+  --bg: #F9F8F5;
+  --bg-card: #FFFFFF;
+  --bg-subtle: #F0EBE3;
+  --text-primary: #0D0C0B;
+  --text-secondary: #5C5750;
+  --text-muted: #9B9590;
+  --border: #E5DDD5;
+  --border-strong: #C8BFB5;
+  --green: #2A5C45;
+  --red: #8B2020;
+}
+
+body { font-family: 'Jost', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; font-weight: 300; }
+
+h1, h2, h3, .display { font-family: 'Cormorant Garamond', serif; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+.view { display: none; min-height: 100vh; }
+.view.active { display: flex; flex-direction: column; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ============ BUTTONS ============ */
+.btn {
+  background: var(--text-primary); color: #fff; border: none; padding: 12px 28px;
+  font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 400;
+  letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.82; }
+.btn-outline { background: transparent; border: 1px solid var(--text-primary); color: var(--text-primary); }
+.btn-outline:hover { background: var(--text-primary); color: #fff; opacity: 1; }
+.btn-sm { padding: 9px 20px; font-size: 12px; }
+.btn-full { width: 100%; }
+
+/* ============ FORMS ============ */
+.form-group { margin-bottom: 20px; }
+label { display: block; font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; }
+input, select, textarea {
+  width: 100%; padding: 13px 16px; border: 1px solid var(--border); background: var(--bg);
+  font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 300; color: var(--text-primary); outline: none; transition: border-color 0.2s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--text-primary); background: #fff; }
+textarea { resize: vertical; min-height: 220px; line-height: 1.6; font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+select option { background: #fff; }
+
+/* ============ LANDING ============ */
+.landing-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 26px 60px; border-bottom: 1px solid var(--border);
+}
+.logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; letter-spacing: 0.05em; cursor: pointer; }
+.logo span { color: var(--text-muted); font-weight: 300; }
+.nav-links { display: flex; gap: 36px; align-items: center; list-style: none; }
+.nav-links a { text-decoration: none; color: var(--text-secondary); font-size: 12px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; transition: color 0.2s; cursor: pointer; }
+.nav-links a:hover { color: var(--text-primary); }
+
+.hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 90px 60px 70px; }
+.hero-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 28px; display: flex; align-items: center; gap: 14px; }
+.hero-eyebrow::before, .hero-eyebrow::after { content: ''; display: block; width: 40px; height: 1px; background: var(--border-strong); }
+.hero h1 { font-size: clamp(72px, 11vw, 130px); font-weight: 300; line-height: 0.93; letter-spacing: -0.02em; margin-bottom: 32px; }
+.hero h1 em { font-style: italic; color: var(--text-secondary); }
+.hero-sub { font-size: 16px; font-weight: 300; color: var(--text-secondary); max-width: 480px; line-height: 1.7; margin-bottom: 44px; }
+.hero-actions { display: flex; gap: 14px; align-items: center; }
+.hero-note { margin-top: 22px; font-size: 12px; color: var(--text-muted); letter-spacing: 0.04em; }
+
+.features { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--border); }
+.feature { padding: 44px 48px; border-right: 1px solid var(--border); }
+.feature:last-child { border-right: none; }
+.feature-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); margin-bottom: 18px; letter-spacing: 0.1em; }
+.feature h3 { font-size: 26px; font-weight: 400; margin-bottom: 14px; line-height: 1.15; }
+.feature p { font-size: 14px; color: var(--text-secondary); line-height: 1.65; font-weight: 300; }
+
+/* ============ AUTH ============ */
+#view-auth { align-items: center; justify-content: center; padding: 60px 20px; }
+.auth-logo { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 400; margin-bottom: 44px; text-align: center; letter-spacing: 0.03em; }
+.auth-card { background: var(--bg-card); border: 1px solid var(--border); width: 100%; max-width: 440px; padding: 44px; }
+.auth-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+.auth-tab { flex: 1; text-align: center; padding: 13px; cursor: pointer; font-size: 12px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; }
+.auth-tab.active { color: var(--text-primary); border-bottom-color: var(--text-primary); }
+.auth-footer { margin-top: 18px; text-align: center; font-size: 13px; color: var(--text-muted); }
+.auth-footer a { color: var(--text-primary); cursor: pointer; text-decoration: underline; }
+
+/* ============ APP LAYOUT ============ */
+.app-layout { display: flex; min-height: 100vh; flex: 1; }
+.sidebar { width: 256px; background: var(--bg-card); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 28px 0; flex-shrink: 0; }
+.sidebar-logo { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 500; padding: 0 24px 28px; border-bottom: 1px solid var(--border); margin-bottom: 20px; letter-spacing: 0.04em; cursor: pointer; }
+.sidebar-nav { list-style: none; padding: 0 10px; flex: 1; }
+.sidebar-nav li button { display: flex; align-items: center; gap: 11px; padding: 10px 14px; color: var(--text-secondary); font-size: 13px; font-weight: 400; letter-spacing: 0.04em; width: 100%; background: none; border: none; cursor: pointer; text-align: left; transition: all 0.15s; border-radius: 2px; font-family: 'Jost', sans-serif; }
+.sidebar-nav li button:hover { color: var(--text-primary); background: var(--bg-subtle); }
+.sidebar-nav li.active button { color: var(--text-primary); background: var(--bg-subtle); font-weight: 500; }
+.nav-icon { width: 15px; text-align: center; font-size: 13px; opacity: 0.5; }
+.sidebar-divider { height: 1px; background: var(--border); margin: 14px 24px; }
+.sidebar-user { padding: 18px 24px 0; border-top: 1px solid var(--border); margin-top: auto; }
+.sidebar-user-name { font-size: 13px; font-weight: 500; margin-bottom: 3px; text-transform: capitalize; }
+.sidebar-user-detail { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+.main-content { flex: 1; overflow-y: auto; }
+.page-header { padding: 28px 44px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.page-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 400; }
+.page-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 300; }
+.page-body { padding: 36px 44px; }
+
+/* ============ CARDS ============ */
+.card { background: var(--bg-card); border: 1px solid var(--border); padding: 28px; }
+.card-title { font-family: 'Cormorant Garamond', serif; font-size: 21px; font-weight: 400; margin-bottom: 5px; }
+.card-subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; font-weight: 300; }
+.info-box { background: var(--bg-subtle); border: 1px solid var(--border); padding: 15px 18px; font-size: 13px; color: var(--text-secondary); line-height: 1.6; font-weight: 300; }
+.info-box strong { color: var(--text-primary); font-weight: 500; }
+.divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+/* ============ CONNECT ============ */
+.connect-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 820px; }
+.broker-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+.broker-option { border: 1px solid var(--border); padding: 11px 14px; cursor: pointer; font-size: 13px; font-weight: 400; transition: all 0.15s; display: flex; align-items: center; gap: 9px; background: var(--bg); }
+.broker-option:hover { border-color: var(--border-strong); background: #fff; }
+.broker-option.selected { border-color: var(--text-primary); background: var(--bg-subtle); font-weight: 500; }
+.broker-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border-strong); flex-shrink: 0; transition: background 0.15s; }
+.broker-option.selected .broker-dot { background: var(--text-primary); }
+.connect-status { margin-top: 18px; padding: 12px 15px; font-size: 13px; display: flex; align-items: center; gap: 10px; }
+.connect-status.success { background: #F0F7F4; border: 1px solid #B8D8CC; color: var(--green); }
+.connect-status.error { background: #FDF2F2; border: 1px solid #E8C0C0; color: var(--red); }
+.connect-status.loading { background: var(--bg-subtle); border: 1px solid var(--border); color: var(--text-secondary); }
+
+/* ============ ANALYSE ============ */
+.analyse-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 36px; max-width: 980px; }
+.step-indicator { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 8px; }
+.step-num { width: 28px; height: 28px; border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; flex-shrink: 0; margin-top: 2px; color: var(--text-secondary); }
+.step-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 400; margin-bottom: 7px; }
+.step-content p { font-size: 13px; color: var(--text-secondary); line-height: 1.65; font-weight: 300; }
+
+.history-table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 10px; margin-bottom: 14px; }
+.history-table th { background: var(--bg-subtle); padding: 7px 9px; text-align: left; font-weight: 400; color: var(--text-secondary); border: 1px solid var(--border); white-space: nowrap; }
+.history-table td { padding: 6px 9px; border: 1px solid var(--border); white-space: nowrap; color: var(--text-primary); }
+.td-buy { color: var(--green); font-weight: 500; }
+.td-sell { color: var(--red); font-weight: 500; }
+.td-pos { color: var(--green); }
+.td-neg { color: var(--red); }
+.table-note { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; font-family: 'JetBrains Mono', monospace; }
+
+/* ============ PROFILE ============ */
+.profile-hero { background: var(--text-primary); color: var(--bg); padding: 44px 44px 44px; }
+.profile-hero-eyebrow { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.4; margin-bottom: 16px; }
+.profile-hero h2 { font-family: 'Cormorant Garamond', serif; font-size: 44px; font-weight: 300; font-style: italic; margin-bottom: 14px; line-height: 1.1; }
+.profile-hero p { font-size: 15px; opacity: 0.65; font-weight: 300; max-width: 600px; line-height: 1.7; }
+.profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
+.profile-stat { background: var(--bg-card); border: 1px solid var(--border); padding: 22px; }
+.stat-label { font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+.stat-value { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 400; line-height: 1; margin-bottom: 5px; }
+.stat-sub { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+.profile-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 4px; }
+.tag { padding: 5px 12px; border: 1px solid var(--border); font-size: 12px; color: var(--text-secondary); font-weight: 400; letter-spacing: 0.03em; }
+.tag-dark { background: var(--text-primary); color: var(--bg); border-color: var(--text-primary); }
+.bullet-item { display: flex; align-items: flex-start; gap: 11px; margin-bottom: 11px; }
+.bullet-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text-primary); flex-shrink: 0; margin-top: 6px; }
+.bullet-check { color: var(--green); flex-shrink: 0; margin-top: 1px; font-size: 13px; }
+.bullet-text { font-size: 13px; color: var(--text-secondary); line-height: 1.55; font-weight: 300; }
+
+/* ============ LANDING SECTIONS ============ */
+.land-section { padding: 80px 60px; border-top: 1px solid var(--border); }
+.land-section-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; }
+.land-section h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 5vw, 56px); font-weight: 300; line-height: 1.1; margin-bottom: 48px; }
+.land-section h2 em { font-style: italic; color: var(--text-secondary); }
+.how-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+.how-step { padding: 36px 36px 36px 0; border-right: 1px solid var(--border); margin-right: 36px; }
+.how-step:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+.how-step-num { font-family: 'JetBrains Mono', monospace; font-size: 42px; font-weight: 400; color: var(--border-strong); margin-bottom: 16px; line-height: 1; }
+.how-step h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; margin-bottom: 10px; }
+.how-step p { font-size: 14px; color: var(--text-secondary); line-height: 1.65; font-weight: 300; }
+.how-connector { display: flex; align-items: center; justify-content: center; padding-top: 20px; }
+.feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.feat-card { background: var(--bg-card); border: 1px solid var(--border); padding: 28px; }
+.feat-icon { font-size: 20px; margin-bottom: 14px; }
+.feat-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; margin-bottom: 8px; }
+.feat-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.65; font-weight: 300; }
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; max-width: 900px; }
+.pricing-card { background: var(--bg-card); border: 1px solid var(--border); padding: 32px; position: relative; }
+.pricing-card.featured { border-color: var(--text-primary); border-width: 2px; }
+.pricing-badge { position: absolute; top: -1px; left: 50%; transform: translateX(-50%); background: var(--text-primary); color: var(--bg); font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; padding: 5px 14px; white-space: nowrap; }
+.pricing-tier { font-size: 11px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+.pricing-price { font-family: 'Cormorant Garamond', serif; font-size: 48px; font-weight: 300; line-height: 1; margin-bottom: 4px; }
+.pricing-price span { font-size: 18px; font-weight: 300; vertical-align: top; margin-top: 8px; display: inline-block; }
+.pricing-period { font-size: 12px; color: var(--text-muted); margin-bottom: 24px; }
+.pricing-features { list-style: none; margin-bottom: 28px; }
+.pricing-features li { font-size: 13px; color: var(--text-secondary); padding: 7px 0; border-bottom: 1px solid var(--border); font-weight: 300; display: flex; align-items: flex-start; gap: 8px; }
+.pricing-features li::before { content: '—'; color: var(--border-strong); flex-shrink: 0; }
+.pricing-features li.incl::before { content: '✓'; color: var(--green); }
+
+/* ============ TRADE LEVELS ============ */
+.trade-levels { background: var(--bg-subtle); border: 1px solid var(--border); padding: 14px 16px; margin: 12px 0; }
+.trade-levels-title { font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+.trade-levels-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.level-item { text-align: center; }
+.level-label { font-size: 9px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; }
+.level-value { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; }
+.level-value.entry { color: var(--text-primary); }
+.level-value.sl { color: var(--red); }
+.level-value.tp { color: var(--green); }
+.rr-badge { text-align: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
+
+/* ============ WHO ITS FOR / TESTIMONIALS / FAQ / FOOTER ============ */
+.who-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.who-card { border: 1px solid var(--border); padding: 26px 22px; background: var(--bg); }
+.who-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 400; margin-bottom: 8px; }
+.who-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; font-weight: 300; }
+.who-tag { display: inline-block; font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); border: 1px solid var(--border); padding: 4px 9px; margin-bottom: 14px; }
+.testimonials { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.testi-card { background: var(--bg-card); border: 1px solid var(--border); padding: 28px; }
+.testi-stars { color: #C4A254; font-size: 13px; margin-bottom: 14px; letter-spacing: 3px; }
+.testi-quote { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; line-height: 1.5; font-style: italic; color: var(--text-primary); margin-bottom: 18px; }
+.testi-author { font-size: 12px; font-weight: 500; letter-spacing: 0.06em; }
+.testi-detail { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-weight: 300; }
+.faq-list { max-width: 760px; }
+.faq-item { border-bottom: 1px solid var(--border); }
+.faq-q { width: 100%; text-align: left; background: none; border: none; padding: 20px 0; font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 400; color: var(--text-primary); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.faq-q:hover { color: var(--text-secondary); }
+.faq-chevron { font-size: 16px; color: var(--text-muted); transition: transform 0.25s; flex-shrink: 0; }
+.faq-item.open .faq-chevron { transform: rotate(180deg); }
+.faq-a { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.25s; }
+.faq-item.open .faq-a { max-height: 300px; padding-bottom: 20px; }
+.faq-a p { font-size: 14px; color: var(--text-secondary); line-height: 1.75; font-weight: 300; }
+.cta-band { background: var(--text-primary); color: var(--bg); padding: 80px 60px; display: flex; align-items: center; justify-content: space-between; gap: 40px; }
+.cta-band h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 50px); font-weight: 300; line-height: 1.1; }
+.cta-band h2 em { font-style: italic; opacity: 0.55; }
+.cta-band-right { flex-shrink: 0; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.cta-band-note { font-size: 12px; opacity: 0.4; letter-spacing: 0.04em; }
+.btn-light { background: var(--bg); color: var(--text-primary); border: none; }
+.btn-light:hover { opacity: 0.88; }
+.btn-ghost { background: transparent; border: 1px solid rgba(249,248,245,0.3); color: var(--bg); }
+.btn-ghost:hover { background: rgba(249,248,245,0.08); opacity: 1; }
+.site-footer { background: var(--bg-card); border-top: 1px solid var(--border); padding: 52px 60px 36px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 40px; }
+.footer-brand { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; margin-bottom: 12px; letter-spacing: 0.04em; }
+.footer-tagline { font-size: 13px; color: var(--text-muted); line-height: 1.65; font-weight: 300; max-width: 260px; }
+.footer-col h4 { font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 14px; }
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 9px; }
+.footer-col a { font-size: 13px; color: var(--text-muted); text-decoration: none; cursor: pointer; font-weight: 300; transition: color 0.15s; }
+.footer-col a:hover { color: var(--text-primary); }
+.footer-bottom { border-top: 1px solid var(--border); padding-top: 22px; display: flex; align-items: flex-start; justify-content: space-between; gap: 40px; }
+.footer-legal { font-size: 11px; color: var(--text-muted); font-weight: 300; line-height: 1.7; max-width: 600px; }
+.footer-copy { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; flex-shrink: 0; margin-top: 2px; }
+
+/* ============ SCANNER ============ */
+.scanning-banner { background: #F0F7F4; border: 1px solid #B8D8CC; padding: 11px 18px; font-size: 12px; color: var(--green); display: flex; align-items: center; gap: 10px; margin-bottom: 22px; font-family: 'JetBrains Mono', monospace; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; flex-shrink: 0; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.scanner-filters { display: flex; gap: 8px; margin-bottom: 26px; flex-wrap: wrap; }
+.filter-btn { padding: 8px 18px; border: 1px solid var(--border); background: transparent; font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 400; letter-spacing: 0.07em; text-transform: uppercase; cursor: pointer; color: var(--text-secondary); transition: all 0.15s; }
+.filter-btn.active { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
+.filter-btn:hover:not(.active) { border-color: var(--border-strong); color: var(--text-primary); }
+.scanner-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.pair-card { background: var(--bg-card); border: 1px solid var(--border); padding: 22px; transition: border-color 0.2s; }
+.pair-card:hover { border-color: var(--border-strong); }
+.pair-card.high-match { border-color: #C0D8CA; border-left: 3px solid var(--green); }
+.pair-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+.pair-name { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 500; letter-spacing: 0.06em; }
+.pair-price { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+.match-badge { background: var(--bg-subtle); padding: 5px 10px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); }
+.match-badge.high { background: #EDF7F3; color: var(--green); }
+.match-badge.medium { background: #FBF8EF; color: #8B6914; }
+.setup-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 7px; }
+.dir-buy { color: var(--green); }
+.dir-sell { color: var(--red); }
+.pair-reasoning { font-size: 13px; color: var(--text-secondary); line-height: 1.55; font-weight: 300; margin-bottom: 14px; }
+.pill-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.pill { font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 3px 8px; border: 1px solid var(--border); color: var(--text-muted); }
+.card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--border); }
+.tf-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); }
+.empty-state { text-align: center; padding: 80px 40px; }
+.empty-state h3 { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; font-style: italic; margin-bottom: 12px; color: var(--text-secondary); }
+.empty-state p { font-size: 14px; color: var(--text-muted); font-weight: 300; }
+
+/* ============ COMPARISON TABLE ============ */
+.compare-wrap { overflow-x: auto; }
+.compare-table { width: 100%; border-collapse: collapse; }
+.compare-table th { padding: 14px 20px; text-align: left; font-size: 11px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-secondary); border-bottom: 2px solid var(--border); }
+.compare-table th.col-ts { background: var(--text-primary); color: var(--bg); }
+.compare-table td { padding: 14px 20px; font-size: 13px; font-weight: 300; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+.compare-table td.col-ts { background: #F5F3EF; font-weight: 400; }
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table .row-label { font-weight: 500; color: var(--text-primary); font-size: 13px; }
+.check-yes { color: var(--green); font-weight: 500; }
+.check-no { color: var(--red); opacity: 0.6; }
+.check-part { color: #8B6914; }
+
+/* ============ TRUST SECTION ============ */
+.trust-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.trust-card { text-align: center; padding: 32px 20px; border: 1px solid var(--border); background: var(--bg-card); }
+.trust-icon { font-size: 26px; margin-bottom: 14px; }
+.trust-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; margin-bottom: 8px; }
+.trust-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; font-weight: 300; }
+
+/* ============ WAITLIST ============ */
+.waitlist-band { background: var(--bg-subtle); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 64px 60px; display: flex; align-items: center; justify-content: space-between; gap: 60px; }
+.waitlist-left h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(28px, 3.5vw, 44px); font-weight: 300; line-height: 1.1; margin-bottom: 10px; }
+.waitlist-left p { font-size: 14px; color: var(--text-secondary); font-weight: 300; line-height: 1.6; max-width: 400px; }
+.waitlist-form { display: flex; gap: 0; flex-shrink: 0; }
+.waitlist-form input { width: 280px; border-right: none; padding: 14px 18px; font-size: 14px; }
+.waitlist-form button { padding: 14px 24px; white-space: nowrap; border: 1px solid var(--text-primary); }
+
+/* ============ PSYCHOLOGY PAGE ============ */
+.psych-hero { background: var(--text-primary); color: var(--bg); padding: 80px 60px; }
+.psych-hero-eyebrow { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.4; margin-bottom: 20px; }
+.psych-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(48px, 7vw, 90px); font-weight: 300; line-height: 0.95; letter-spacing: -0.02em; margin-bottom: 28px; }
+.psych-hero h1 em { font-style: italic; opacity: 0.55; }
+.psych-hero p { font-size: 17px; opacity: 0.65; font-weight: 300; max-width: 620px; line-height: 1.7; }
+.psych-nav { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0 60px; display: flex; gap: 0; overflow-x: auto; }
+.psych-nav-link { padding: 16px 20px; font-size: 12px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s; }
+.psych-nav-link:hover { color: var(--text-primary); }
+.psych-nav-link.active { color: var(--text-primary); border-bottom-color: var(--text-primary); }
+.psych-body { max-width: 820px; padding: 60px; }
+.psych-chapter { margin-bottom: 64px; }
+.psych-chapter-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); letter-spacing: 0.12em; margin-bottom: 12px; }
+.psych-chapter h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(30px, 4vw, 46px); font-weight: 300; line-height: 1.1; margin-bottom: 20px; }
+.psych-chapter h2 em { font-style: italic; color: var(--text-secondary); }
+.psych-chapter p { font-size: 15px; color: var(--text-secondary); line-height: 1.8; font-weight: 300; margin-bottom: 18px; }
+.psych-chapter p strong { color: var(--text-primary); font-weight: 500; }
+.psych-quote { border-left: 3px solid var(--border-strong); padding: 20px 28px; margin: 28px 0; background: var(--bg-card); }
+.psych-quote p { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; font-style: italic; color: var(--text-primary); line-height: 1.5; margin-bottom: 10px; }
+.psych-quote cite { font-size: 12px; color: var(--text-muted); font-style: normal; letter-spacing: 0.06em; font-family: 'Jost', sans-serif; }
+.psych-insight { background: var(--bg-subtle); border: 1px solid var(--border); padding: 22px 26px; margin: 24px 0; }
+.psych-insight-label { font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.psych-insight p { font-size: 14px; color: var(--text-primary); line-height: 1.65; font-weight: 400; margin: 0; }
+.psych-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 0; }
+.psych-card { border: 1px solid var(--border); padding: 22px; }
+.psych-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; margin-bottom: 8px; }
+.psych-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.65; font-weight: 300; margin: 0; }
+.fear-label { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin-bottom: 8px; }
+.psych-back { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); cursor: pointer; padding: 20px 60px; border-bottom: 1px solid var(--border); background: var(--bg-card); transition: color 0.15s; }
+.psych-back:hover { color: var(--text-primary); }
+
+/* ============ INTEGRATIONS PAGE ============ */
+.integ-hero { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 60px 60px 50px; }
+.integ-hero-eyebrow { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 16px; }
+.integ-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 5vw, 64px); font-weight: 300; line-height: 1.05; margin-bottom: 18px; }
+.integ-hero h1 em { font-style: italic; color: var(--text-secondary); }
+.integ-hero p { font-size: 16px; color: var(--text-secondary); font-weight: 300; max-width: 580px; line-height: 1.7; }
+.integ-body { padding: 52px 60px; max-width: 1100px; }
+.integ-section { margin-bottom: 64px; }
+.integ-section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.integ-section h2 { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 400; margin-bottom: 8px; line-height: 1.1; }
+.integ-section p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; font-weight: 300; max-width: 680px; margin-bottom: 28px; }
+.integ-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.integ-card { background: var(--bg-card); border: 1px solid var(--border); padding: 26px; position: relative; }
+.integ-card.beta::after { content: 'COMING SOON'; position: absolute; top: 14px; right: 14px; font-size: 9px; font-weight: 500; letter-spacing: 0.12em; color: var(--text-muted); border: 1px solid var(--border); padding: 3px 8px; }
+.integ-card.live::after { content: 'CONNECTED'; position: absolute; top: 14px; right: 14px; font-size: 9px; font-weight: 500; letter-spacing: 0.12em; color: var(--green); border: 1px solid #B8D8CC; padding: 3px 8px; background: #F0F7F4; }
+.integ-logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400; margin-bottom: 12px; letter-spacing: 0.02em; }
+.integ-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; margin-bottom: 6px; }
+.integ-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; font-weight: 300; }
+.broker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.broker-card { background: var(--bg-card); border: 1px solid var(--border); padding: 18px 20px; display: flex; align-items: center; gap: 12px; }
+.broker-initial { width: 36px; height: 36px; background: var(--bg-subtle); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 500; flex-shrink: 0; }
+.broker-info h4 { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.broker-info p { font-size: 11px; color: var(--text-muted); font-weight: 300; }
+.steps-list { counter-reset: step; }
+.step-item { display: flex; gap: 20px; margin-bottom: 28px; align-items: flex-start; }
+.step-num-circle { width: 32px; height: 32px; border: 1px solid var(--text-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; flex-shrink: 0; margin-top: 2px; }
+.step-item-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; margin-bottom: 6px; }
+.step-item-content p { font-size: 13px; color: var(--text-secondary); line-height: 1.65; font-weight: 300; }
+.integ-notice { background: var(--bg-subtle); border: 1px solid var(--border); padding: 18px 22px; font-size: 13px; color: var(--text-secondary); line-height: 1.6; font-weight: 300; }
+.integ-notice strong { color: var(--text-primary); font-weight: 500; }
+.integ-back { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); cursor: pointer; padding: 16px 60px; border-bottom: 1px solid var(--border); background: var(--bg-card); transition: color 0.15s; }
+.integ-back:hover { color: var(--text-primary); }
+
+/* ============ LOADING OVERLAY ============ */
+.loading-overlay { position: fixed; inset: 0; background: rgba(249,248,245,0.93); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
+.loading-overlay.active { display: flex; }
+.load-title { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 300; font-style: italic; margin-bottom: 12px; }
+.load-sub { font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.05em; }
+.load-bar { width: 180px; height: 1px; background: var(--border); margin-top: 28px; position: relative; overflow: hidden; }
+.load-bar::after { content: ''; position: absolute; height: 100%; width: 55%; background: var(--text-primary); animation: loadbar 1.4s ease-in-out infinite; }
+@keyframes loadbar { 0% { left: -55%; } 100% { left: 120%; } }
+
+/* ============ TOAST ============ */
+.toast { position: fixed; bottom: 28px; right: 28px; background: var(--text-primary); color: var(--bg); padding: 13px 20px; font-size: 13px; font-weight: 300; z-index: 200; opacity: 0; transform: translateY(8px); transition: all 0.28s; max-width: 320px; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loading">
+  <div class="load-title" id="load-title">Analysing trades...</div>
+  <div class="load-sub" id="load-sub">This may take a moment</div>
+  <div class="load-bar"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- LANDING                                    -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="view active" id="view-landing">
+  <nav class="landing-nav">
+    <div class="logo" onclick="showView('landing')">Trade<span>Shadow</span></div>
+    <ul class="nav-links">
+      <li><a onclick="navTo('section-how')">How it works</a></li>
+      <li><a onclick="navTo('section-features')">Features</a></li>
+      <li><a onclick="navTo('section-pricing')">Pricing</a></li>
+      <li><a onclick="showView('psychology')">The Mental Game</a></li>
+      <li><a onclick="showView('integrations')">Integrations</a></li>
+    </ul>
+    <div style="display:flex;gap:12px">
+      <button class="btn btn-outline btn-sm" onclick="showView('auth','login')">Log In</button>
+      <button class="btn btn-sm" onclick="showView('auth','signup')">Get Started</button>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-eyebrow">AI-Powered Market Intelligence</div>
+    <h1>Trade<em>Shadow</em></h1>
+    <p class="hero-sub">Your AI trading shadow that learns your strategy, then scans 50+ currency pairs to find the setups you would have taken — before you even open a chart.</p>
+    <div class="hero-actions">
+      <button class="btn" onclick="showView('auth','signup')">Start Free Trial</button>
+      <button class="btn btn-outline" onclick="showView('auth','login')">Sign In</button>
+    </div>
+    <p class="hero-note">No financial advice. No signals. No outside influence. Just your strategy, scaled.</p>
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-num">01 — Learn</div>
+      <h3>It Learns<br><em>Your Edge</em></h3>
+      <p>Connect your MetaTrader account and TradeShadow analyses weeks of your trade history to build a precise model of how you trade — your pairs, sessions, entries, and patterns.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">02 — Scan</div>
+      <h3>Scans While<br><em>You Sleep</em></h3>
+      <p>While you focus on one chart, TradeShadow simultaneously evaluates 50+ currency pairs looking for the exact technical and fundamental conditions you personally look for.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">03 — Alert</div>
+      <h3>Your Setup,<br><em>Your Call</em></h3>
+      <p>When a match is found, you're notified with a full explanation of why it fits your style. No advice. No predictions. Just your strategy, reflected back at you.</p>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="land-section" id="section-how">
+    <div class="land-section-eyebrow">Simple · Transparent · Built Around You</div>
+    <h2>How It <em>Works</em></h2>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-num">01</div>
+        <h3>Connect via MetaTrader & Your Broker</h3>
+        <p>TradeShadow connects directly to your MT4 or MT5 account through your broker — whether that's IC Markets, Pepperstone, OANDA, FP Markets, or any other major broker. You enter your broker's server name and your investor (read-only) password. TradeShadow can never place, modify, or close trades. It only reads your history.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">02</div>
+        <h3>One Month of Learning Your System</h3>
+        <p>Over the first month, TradeShadow silently studies every trade you take. It looks at when you enter, which pairs you favour, what your setups look like technically, how long you hold, your stop and target placement, and your win rate. It finds the patterns behind your profitable trades and builds a precise model of your edge — not a textbook strategy, yours specifically.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">03</div>
+        <h3>Instant Alerts with Entry, SL & TP</h3>
+        <p>Once it knows your style, TradeShadow scans your selected markets continuously. The moment it spots conditions that match your historical setups, it notifies you immediately — with a specific entry price, stop loss, and take profit calculated from your own data. You never miss a setup just because you weren't watching that chart.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="land-section" id="section-features" style="background:var(--bg-card)">
+    <div class="land-section-eyebrow">Built For Serious Traders</div>
+    <h2>Everything You Need, <em>Nothing You Don't</em></h2>
+    <div class="feat-grid">
+
+      <div class="feat-card">
+        <div class="feat-icon">⬡</div>
+        <h3>MetaTrader & Broker Integration</h3>
+        <p>Connect your MT4 or MT5 account through your existing broker in minutes. No third-party platform needed — TradeShadow works directly with your broker's server using your read-only investor password. Compatible with all major brokers including IC Markets, Pepperstone, OANDA, FP Markets, XM, Exness, and more. Your trading password is never required.</p>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">◎</div>
+        <h3>AI Style Learning Over 1 Month</h3>
+        <p>TradeShadow spends the first month analysing every trade you execute — your entry conditions, timing, pairs, session preferences, and how you manage positions. It identifies the common thread running through your winning trades, then uses that fingerprint to find identical setups across the markets you've selected. The longer it learns, the more accurate it becomes.</p>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">◉</div>
+        <h3>Instant Setup Notifications</h3>
+        <p>As soon as TradeShadow detects a setup matching your criteria, you receive an alert — immediately, not on a schedule. You'll see the pair, the setup type, entry price, stop loss, take profit, and the reason it matches your style. No more missing trades because you weren't watching. Whether you're away from your desk, sleeping, or focused on another chart, you'll never miss your setup again.</p>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">◈</div>
+        <h3>Win Probability from Your Own Data</h3>
+        <p>TradeShadow compares each flagged setup against the trades you took during the learning period. It finds historical similarities — same pair, same session, same setup type, similar market conditions — and calculates an approximate win probability based purely on your own track record. You'll see a percentage like "74% win probability based on 18 similar historical trades," giving you context before you decide.</p>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">◌</div>
+        <h3>Live Price & Volatility Updates</h3>
+        <p>Once a setup is flagged, TradeShadow doesn't go quiet. Every 10–15 minutes it sends you a price update on that trade — whether it's approaching your entry, moving away, or if conditions are changing. It also monitors volatility in real time: if a pair becomes unusually slow or suddenly volatile, it flags this so you can adjust your expectations before entering or manage an open position more effectively.</p>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-icon">◇</div>
+        <h3>Your Strategy, Scaled Across Markets</h3>
+        <p>As a trader you can only watch one chart at a time. TradeShadow watches all of yours simultaneously — scanning your selected pairs, stocks, indices, or forex markets depending on your plan. It filters out everything that doesn't match your criteria and only surfaces what you would have taken yourself, based on the data. No noise from other traders, no conflicting analysis, no external opinion.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="land-section" id="section-pricing">
+    <div class="land-section-eyebrow">Simple Plans · No Hidden Fees</div>
+    <h2>Choose Your <em>Level of Coverage</em></h2>
+    <div class="pricing-grid" style="max-width:1000px">
+
+      <div class="pricing-card">
+        <div class="pricing-tier">Core</div>
+        <div class="pricing-price"><span>£</span>39<span style="font-size:16px">.99</span></div>
+        <div class="pricing-period">per month · cancel anytime</div>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:18px;line-height:1.5;font-weight:300">Focus on the markets that matter most to you. Ideal for traders with a defined 2–5 pair speciality.</p>
+        <ul class="pricing-features">
+          <li class="incl">3–5 selected pairs scanned</li>
+          <li class="incl">1 month AI style learning</li>
+          <li class="incl">Instant setup alerts</li>
+          <li class="incl">Entry price, SL & TP on every alert</li>
+          <li class="incl">Win probability % per setup</li>
+          <li class="incl">Price updates every 10–15 min</li>
+          <li class="incl">Volatility & slow market alerts</li>
+          <li class="incl">MT4 & MT5 broker integration</li>
+          <li>Stocks, indices & commodities</li>
+          <li>Up to 20 pairs</li>
+        </ul>
+        <button class="btn btn-outline btn-full" onclick="showView('auth','signup')">Start Free Trial</button>
+      </div>
+
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Most Popular</div>
+        <div class="pricing-tier">Advanced</div>
+        <div class="pricing-price"><span>£</span>79<span style="font-size:16px">.99</span></div>
+        <div class="pricing-period">per month · cancel anytime</div>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:18px;line-height:1.5;font-weight:300">For traders who want broader coverage across forex without missing opportunities across multiple markets.</p>
+        <ul class="pricing-features">
+          <li class="incl">Up to 20 currency pairs scanned</li>
+          <li class="incl">Everything in Core</li>
+          <li class="incl">Deeper win probability analysis</li>
+          <li class="incl">Session-specific pattern matching</li>
+          <li class="incl">Multi-timeframe scanning (H1–D1)</li>
+          <li class="incl">Fundamental & news event overlay</li>
+          <li class="incl">Priority AI learning queue</li>
+          <li class="incl">Push & email notifications</li>
+          <li>Stocks, indices & commodities</li>
+        </ul>
+        <button class="btn btn-full" onclick="showView('auth','signup')">Start Free Trial</button>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-tier">Professional</div>
+        <div class="pricing-price"><span>£</span>119<span style="font-size:16px">.99</span></div>
+        <div class="pricing-period">per month · cancel anytime</div>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:18px;line-height:1.5;font-weight:300">Full market coverage across forex, stocks, indices, and commodities for serious and professional traders.</p>
+        <ul class="pricing-features">
+          <li class="incl">Forex, stocks, indices & commodities</li>
+          <li class="incl">Everything in Advanced</li>
+          <li class="incl">Unlimited pairs & instruments</li>
+          <li class="incl">Cross-market setup correlation</li>
+          <li class="incl">Advanced trade probability scoring</li>
+          <li class="incl">Prop firm performance reports</li>
+          <li class="incl">Multiple strategy profiles</li>
+          <li class="incl">Dedicated account support</li>
+          <li class="incl">Early access to new features</li>
+        </ul>
+        <button class="btn btn-outline btn-full" onclick="showView('auth','signup')">Start Free Trial</button>
+      </div>
+
+    </div>
+    <p style="margin-top:28px;font-size:13px;color:var(--text-muted);font-weight:300;max-width:700px;line-height:1.7">All plans include a 14-day free trial. No card required to start. TradeShadow identifies setups based on your historical data only — it does not provide financial advice, and all trading decisions remain entirely yours.</p>
+  </div>
+
+  <!-- WHO IT'S FOR -->
+  <div class="land-section" style="background:var(--bg-card)">
+    <div class="land-section-eyebrow">Who TradeShadow is Built For</div>
+    <h2>Every Trader Who Has <em>Missed a Setup</em></h2>
+    <div class="who-grid">
+      <div class="who-card">
+        <div class="who-tag">Part-Time Traders</div>
+        <h3>Can't Watch Every Chart</h3>
+        <p>You have a job, a life, commitments. TradeShadow watches your chosen markets around the clock and only interrupts you when something matching your exact criteria appears.</p>
+      </div>
+      <div class="who-card">
+        <div class="who-tag">Intermediate Traders</div>
+        <h3>Refining Your Strategy</h3>
+        <p>You have a working system but want to tighten it. The win probability scoring and historical pattern analysis help you understand which of your setups are truly your strongest.</p>
+      </div>
+      <div class="who-card">
+        <div class="who-tag">Advanced Traders</div>
+        <h3>Scaling Without Compromise</h3>
+        <p>You know your edge inside out. TradeShadow simply extends your reach — finding the same setups you would have spotted across markets you weren't watching, faster.</p>
+      </div>
+      <div class="who-card">
+        <div class="who-tag">Prop Firm Traders</div>
+        <h3>Consistent Execution</h3>
+        <p>Consistency is everything when you're protecting a funded account. TradeShadow keeps you aligned with your own strategy and flags only the setups that match your historically profitable conditions.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div class="land-section">
+    <div class="land-section-eyebrow">Early Access Feedback</div>
+    <h2>What Beta Traders <em>Are Saying</em></h2>
+    <div class="testimonials">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">"I trade GBPUSD and EURUSD almost exclusively. TradeShadow spotted three setups in a week I would have taken — two while I was at work. That alone pays for itself."</div>
+        <div class="testi-author">James R.</div>
+        <div class="testi-detail">Intermediate Forex Trader · London · Beta Tester</div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">"The win probability percentage is something I didn't know I needed. Seeing '71% based on 14 similar trades' before I enter gives me a level of confidence I didn't have before."</div>
+        <div class="testi-author">Priya K.</div>
+        <div class="testi-detail">Part-Time Trader · 3 years experience · Beta Tester</div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">"What I like most is it doesn't try to teach me or override my view. It just finds my setups. The 10-minute price updates on live trades are genuinely useful — no more staring at charts."</div>
+        <div class="testi-author">Marcus T.</div>
+        <div class="testi-detail">Prop Firm Trader · Advanced · Beta Tester</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="land-section" style="background:var(--bg-card)" id="section-faq">
+    <div class="land-section-eyebrow">Common Questions</div>
+    <h2>Frequently <em>Asked Questions</em></h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Can TradeShadow place trades on my behalf? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a"><p>No — never. TradeShadow connects using your broker's investor (read-only) password, which is specifically designed to prevent any trade execution, modification, or closure. It can only read your trade history. Your master trading password is never asked for, never stored, and never used. All trading decisions are made entirely by you.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Which brokers and platforms are supported? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a"><p>TradeShadow connects to MetaTrader 4 (MT4) and MetaTrader 5 (MT5), which covers the vast majority of retail forex brokers. This includes IC Markets, Pepperstone, OANDA, FP Markets, XM Global, Exness, Axiory, and most other regulated brokers. If your broker offers MT4 or MT5, it is compatible. The Professional plan also supports stock brokers and index providers.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How long does the AI take to learn my trading style? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a"><p>TradeShadow needs a meaningful sample of your trades to build an accurate profile — typically one month of active trading. The more trades in the dataset, the more precise the win probability scoring and pattern matching becomes. You can also upload your existing MT4/MT5 trade history directly to get started immediately, even before the learning period is complete.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">What does the win probability percentage actually mean? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a"><p>When TradeShadow flags a setup, it searches your trade history for similar historical setups — same pair, similar session, comparable technical conditions, same setup type. It calculates what percentage of those historical trades were profitable. So a 74% probability means that 74% of the time you took a similar setup in the past, it worked. This is based purely on your own data, not market predictions or generic statistics.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Does TradeShadow give financial advice or trade signals? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a"><p>No. TradeShadow is a personal analysis tool, not an advisory service. It does not tell you what to trade, predict market movements, or recommend positions. It reflects your own historical criteria back at you — showing you setups you would likely have considered based on your past behaviour. All entry, SL and TP levels are derived from your own trading data. Every decision is yours.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How often will I receive price updates on active setups? <span class="faq-chevron">▾</span></button>
+        <div class="faq-a"><p>Once a setup is flagged, TradeShadow sends you a price update every 10–15 minutes showing where the price is relative to your entry, stop loss, and take profit levels. It also monitors volatility — if a pair becomes unusually fast-moving or unusually slow, you'll be notified so you can factor that into your decision before entering or while managing an open trade.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOT A SIGNAL SERVICE -->
+  <div class="land-section">
+    <div class="land-section-eyebrow">Why TradeShadow Is Different</div>
+    <h2>Not a Signal Service. <em>Not a Bot. Not a Guru.</em></h2>
+    <div class="compare-wrap">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th style="width:260px">Capability</th>
+            <th class="col-ts">TradeShadow</th>
+            <th>Signal Services</th>
+            <th>Generic Scanners</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="row-label">Learns your personal strategy</td><td class="col-ts"><span class="check-yes">✓ Yes — from your own MT4/5 history</span></td><td><span class="check-no">✗ No — uses their strategy</span></td><td><span class="check-no">✗ No — generic indicators only</span></td></tr>
+          <tr><td class="row-label">Entry, SL & TP based on your data</td><td class="col-ts"><span class="check-yes">✓ Calculated from your own R:R history</span></td><td><span class="check-part">~ Sometimes, but their levels</span></td><td><span class="check-no">✗ Not personalised</span></td></tr>
+          <tr><td class="row-label">Win probability from your trades</td><td class="col-ts"><span class="check-yes">✓ Based on your historical patterns</span></td><td><span class="check-no">✗ No historical basis for you</span></td><td><span class="check-no">✗ Not available</span></td></tr>
+          <tr><td class="row-label">Tells you what to trade</td><td class="col-ts"><span style="color:var(--green);font-weight:500">✗ Never — you decide everything</span></td><td><span class="check-no">✗ Yes — removes your judgment</span></td><td><span class="check-part">~ Sometimes adds opinions</span></td></tr>
+          <tr><td class="row-label">Removes outside influence</td><td class="col-ts"><span class="check-yes">✓ Only your criteria, nothing else</span></td><td><span class="check-no">✗ Completely replaces your view</span></td><td><span class="check-part">~ Depends on the tool</span></td></tr>
+          <tr><td class="row-label">Live price & volatility updates</td><td class="col-ts"><span class="check-yes">✓ Every 10–15 minutes on flagged setups</span></td><td><span class="check-part">~ Rarely, alerts only</span></td><td><span class="check-no">✗ No ongoing monitoring</span></td></tr>
+          <tr><td class="row-label">Works with your broker & MT4/5</td><td class="col-ts"><span class="check-yes">✓ Connects directly, read-only</span></td><td><span class="check-no">✗ Usually separate platforms</span></td><td><span class="check-part">~ Some integrations</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TRUST & SECURITY -->
+  <div class="land-section" style="background:var(--bg-card)">
+    <div class="land-section-eyebrow">Your Account · Your Data · Your Control</div>
+    <h2>Built on <em>Trust</em></h2>
+    <div class="trust-grid">
+      <div class="trust-card">
+        <div class="trust-icon">◎</div>
+        <h3>Read-Only Access Only</h3>
+        <p>TradeShadow connects using your broker's investor password — a separate credential specifically designed to prevent any trade execution. We can see your history. We cannot touch your money.</p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">◈</div>
+        <h3>Your Data Stays Yours</h3>
+        <p>Your trade history is used solely to build your personal strategy profile. It is never shared, sold, or used to inform other traders' profiles. Your edge belongs to you.</p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">⬡</div>
+        <h3>No Financial Advice</h3>
+        <p>TradeShadow is an analytical tool, not an adviser. It reflects your own historical behaviour back at you. All decisions — every entry, every exit — are made entirely by you.</p>
+      </div>
+      <div class="trust-card">
+        <div class="trust-icon">◉</div>
+        <h3>Cancel Anytime</h3>
+        <p>No lock-in contracts. No hidden fees. Cancel your subscription at any time with a single click. Your profile data can be exported or deleted on request.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAITLIST / EMAIL CAPTURE -->
+  <div class="waitlist-band">
+    <div class="waitlist-left">
+      <h2>Join the Waitlist.<br><em>Be First In.</em></h2>
+      <p>TradeShadow is currently in early access. Join the waitlist and we'll notify you the moment your spot opens — along with an exclusive founding member discount.</p>
+    </div>
+    <div>
+      <div class="waitlist-form">
+        <input type="email" id="waitlist-email" placeholder="Your email address">
+        <button class="btn" onclick="joinWaitlist()">Join Waitlist</button>
+      </div>
+      <p style="font-size:11px;color:var(--text-muted);margin-top:10px;font-weight:300">No spam. Just one email when your access is ready.</p>
+    </div>
+  </div>
+
+  <!-- CTA BAND -->
+  <div class="cta-band">
+    <div>
+      <div style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;opacity:0.4;margin-bottom:16px">Start Today · 14-Day Free Trial</div>
+      <h2>Your Strategy.<br><em>Scaled Across Every Market.</em></h2>
+    </div>
+    <div class="cta-band-right">
+      <button class="btn btn-light" onclick="showView('auth','signup')">Start Free Trial</button>
+      <button class="btn btn-ghost btn-sm" onclick="navTo('section-pricing')">View Pricing</button>
+      <div class="cta-band-note">No card required · Cancel anytime</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">TradeShadow</div>
+        <p class="footer-tagline">An AI trading tool that learns your strategy and scans the markets for the setups you would have taken — without telling you what to do.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a onclick="navTo('section-how')">How it works</a></li>
+          <li><a onclick="navTo('section-features')">Features</a></li>
+          <li><a onclick="navTo('section-pricing')">Pricing</a></li>
+          <li><a onclick="showView('psychology')">The Mental Game</a></li>
+          <li><a onclick="showView('integrations')">Integrations</a></li>
+          <li><a onclick="navTo('section-faq')">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Brokers</h4>
+        <ul>
+          <li><a>IC Markets</a></li>
+          <li><a>Pepperstone</a></li>
+          <li><a>OANDA</a></li>
+          <li><a>FP Markets</a></li>
+          <li><a>XM Global</a></li>
+          <li><a>Exness</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a>Privacy Policy</a></li>
+          <li><a>Terms of Service</a></li>
+          <li><a>Risk Disclaimer</a></li>
+          <li><a>Cookie Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-legal">TradeShadow is not a financial adviser and does not provide investment advice, trade signals, or financial recommendations. All content is for informational purposes only. Trading forex, stocks, and other financial instruments carries a high level of risk and may not be suitable for all investors. Past performance is not indicative of future results. You should never trade money you cannot afford to lose. Always seek independent financial advice if required.</p>
+      <div class="footer-copy">© 2025 TradeShadow</div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PSYCHOLOGY                                 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="view" id="view-psychology">
+  <div class="psych-back" onclick="showView('landing')">← Back to TradeShadow</div>
+
+  <div class="psych-hero">
+    <div class="psych-hero-eyebrow">The Inner Game of Trading</div>
+    <h1>The Market<br>Doesn't Beat You.<br><em>Your Mind Does.</em></h1>
+    <p>Drawing on decades of research, the experiences of the world's greatest traders, and the psychology of performance — this is what separates consistent traders from everyone else.</p>
+  </div>
+
+  <nav class="psych-nav">
+    <div class="psych-nav-link active" onclick="scrollPsych('psych-s1',this)">The Probability Mindset</div>
+    <div class="psych-nav-link" onclick="scrollPsych('psych-s2',this)">The Four Fears</div>
+    <div class="psych-nav-link" onclick="scrollPsych('psych-s3',this)">Market Wizards Lessons</div>
+    <div class="psych-nav-link" onclick="scrollPsych('psych-s4',this)">The Nature of Markets</div>
+    <div class="psych-nav-link" onclick="scrollPsych('psych-s5',this)">Discipline & Process</div>
+    <div class="psych-nav-link" onclick="scrollPsych('psych-s6',this)">How TradeShadow Helps</div>
+  </nav>
+
+  <div class="psych-body">
+
+    <!-- SECTION 1 -->
+    <div class="psych-chapter" id="psych-s1">
+      <div class="psych-chapter-num">Chapter One</div>
+      <h2>Thinking in <em>Probabilities</em></h2>
+
+      <p>One of the most profound shifts a trader can make is moving from thinking in terms of certainties to thinking in terms of probabilities. This concept sits at the core of Mark Douglas's landmark work, <strong>Trading in the Zone</strong> — perhaps the single most important book ever written about the psychology of trading.</p>
+
+      <p>Douglas observed that most traders approach the market as though each trade has a predictable, knowable outcome. They become emotionally invested in being right. When a trade fails, it doesn't feel like a probability playing out — it feels like a personal failure, a mistake, something that shouldn't have happened. This creates a cycle of fear, hesitation, and inconsistency that destroys more trading accounts than any bad strategy ever could.</p>
+
+      <div class="psych-quote">
+        <p>"The best traders have developed an edge, and they trust that edge implicitly. They don't need to know what the next trade will do. They know their edge will produce results over a series of trades."</p>
+        <cite>Mark Douglas — Trading in the Zone</cite>
+      </div>
+
+      <p>The shift Douglas describes is deceptively simple: accept that any individual trade can go either way. What matters is not this trade — it's your edge across hundreds of trades. A strategy with a 65% win rate will produce losing streaks. That is not failure. That is the natural distribution of a probabilistic system working exactly as it should.</p>
+
+      <p>The traders who struggle most are those who cannot separate the outcome of a single trade from the quality of their decision. A perfectly executed trade that loses money is not a bad trade. A poorly executed trade that makes money is not a good trade. <strong>The quality of the decision and the outcome of the trade are two entirely separate things.</strong></p>
+
+      <div class="psych-insight">
+        <div class="psych-insight-label">TradeShadow Perspective</div>
+        <p>This is exactly why the win probability feature shows you a percentage based on historical similarities — not to guarantee an outcome, but to remind you that you're operating within a probability distribution. A 68% probability setup will lose roughly 32% of the time. That is not a failure of the tool or your strategy. It is the system working correctly.</p>
+      </div>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="psych-chapter" id="psych-s2">
+      <div class="psych-chapter-num">Chapter Two</div>
+      <h2>The Four Trading <em>Fears</em></h2>
+
+      <p>Douglas identified four core psychological fears that cause traders to act irrationally — entering too late, exiting too early, holding too long, or avoiding trades entirely. Understanding these fears is the first step to overcoming them.</p>
+
+      <div class="psych-grid">
+        <div class="psych-card">
+          <div class="fear-label">Fear 01</div>
+          <h3>The Fear of Being Wrong</h3>
+          <p>The ego equates a losing trade with being wrong as a person. This causes traders to move stop losses, add to losing positions, and stay in trades well past their original plan — all to avoid acknowledging a loss. The market has no opinion of you. A loss is simply a loss.</p>
+        </div>
+        <div class="psych-card">
+          <div class="fear-label">Fear 02</div>
+          <h3>The Fear of Losing Money</h3>
+          <p>Distinct from fear of being wrong, this fear causes premature exits and under-sized positions. Traders who fear losing money take profits far too early, cutting winners that would have reached their target. Ironically, this fear of losing creates worse overall returns than accepting losses cleanly.</p>
+        </div>
+        <div class="psych-card">
+          <div class="fear-label">Fear 03</div>
+          <h3>The Fear of Missing Out</h3>
+          <p>FOMO causes traders to chase moves already in progress, enter without their setup being present, and abandon their criteria entirely because they watched a trade they didn't take work. This is among the most destructive forces in retail trading and is amplified by social media.</p>
+        </div>
+        <div class="psych-card">
+          <div class="fear-label">Fear 04</div>
+          <h3>The Fear of Leaving Money on the Table</h3>
+          <p>The inverse of fear of losing — the inability to take profit at the target because it "might go further." This causes traders to turn winning trades into breakeven or losing ones, and creates a permanent dissatisfaction with every outcome regardless of result.</p>
+        </div>
+      </div>
+
+      <p>These four fears are not weaknesses unique to new traders. They are hardwired human responses to uncertainty and financial risk. The difference between struggling traders and consistent ones is not the absence of these feelings — it is a practiced ability to act according to their process regardless of how they feel in the moment.</p>
+
+      <div class="psych-quote">
+        <p>"Until you genuinely accept the risk, you will experience the pain of the fear of being wrong, the fear of losing money, the fear of missing out, and the fear of leaving money on the table."</p>
+        <cite>Mark Douglas — Trading in the Zone</cite>
+      </div>
+    </div>
+
+    <!-- SECTION 3 -->
+    <div class="psych-chapter" id="psych-s3">
+      <div class="psych-chapter-num">Chapter Three</div>
+      <h2>Lessons from the <em>Market Wizards</em></h2>
+
+      <p>Jack Schwager's <strong>Market Wizards</strong> series — interviews with some of the most successful traders in history — revealed a striking pattern. Across wildly different styles, time frames, and markets, the same themes emerged again and again. The psychological thread was more consistent than any technical approach.</p>
+
+      <div class="psych-quote">
+        <p>"The most important thing is money management, money management, money management. Anyone who is successful will tell you the same thing."</p>
+        <cite>Paul Tudor Jones — Market Wizards</cite>
+      </div>
+
+      <p><strong>Cut your losses and let your winners run.</strong> This advice sounds almost offensively simple. Yet Schwager found that traders who struggled most consistently did the exact opposite — they let losses run while cutting winners short. The emotional logic is understandable: taking a small profit feels good and safe; holding a loss feels like it might still come back. The mathematical reality is that this approach slowly destroys accounts regardless of win rate.</p>
+
+      <div class="psych-quote">
+        <p>"I don't think trading strategies are as critical as money management and psychology. The key is not losing more than you can afford to lose."</p>
+        <cite>Ed Seykota — Market Wizards</cite>
+      </div>
+
+      <p><strong>Every great trader has found their own style.</strong> Michael Marcus, one of the traders profiled in Market Wizards, built a fortune by developing a methodology that was uniquely his — one that suited his personality, his risk tolerance, and his way of reading the market. He explicitly discouraged copying other traders' styles, because without the deep belief and understanding that comes from developing your own approach, you will abandon the method the moment it draws down.</p>
+
+      <p><strong>The common traits Schwager found in every elite trader:</strong></p>
+      <div class="psych-grid" style="margin-top:16px">
+        <div class="psych-card"><h3>Absolute Discipline</h3><p>Every elite trader had a set of rules they followed without exception. Not most of the time — every time. Discipline was not about willpower in the moment. It was about having committed to a process before emotion entered the picture.</p></div>
+        <div class="psych-card"><h3>Acceptance of Uncertainty</h3><p>None of the traders in Market Wizards believed they could predict the market. They all acted on probabilities, managed risk tightly, and understood that being wrong 40% of the time was entirely consistent with extraordinary performance.</p></div>
+        <div class="psych-card"><h3>A Defined Edge</h3><p>Every trader could articulate — precisely — what their edge was. Not "I trade breakouts" but a specific, measurable condition that they had observed to produce positive expectancy over a statistically significant number of trades.</p></div>
+        <div class="psych-card"><h3>Emotional Detachment from Outcomes</h3><p>The best traders treated winning and losing trades with the same level of emotional response: minimal. They had learned to evaluate decisions, not outcomes. This is one of the hardest psychological shifts in trading, and arguably the most valuable.</p></div>
+      </div>
+    </div>
+
+    <!-- SECTION 4 -->
+    <div class="psych-chapter" id="psych-s4">
+      <div class="psych-chapter-num">Chapter Four</div>
+      <h2>The True Nature <em>of the Market</em></h2>
+
+      <p>The forex market is the largest, most liquid financial market in the world — with over $7 trillion traded daily. It operates 24 hours a day, five days a week, across every timezone. It is shaped by central bank policy, geopolitical events, economic data, institutional positioning, retail flow, and pure sentiment. <strong>No single person, algorithm, or institution controls it.</strong></p>
+
+      <p>This is both the source of its opportunity and the source of most traders' psychological difficulty. The market is not a system that rewards effort, intelligence, or analysis in any direct way. It rewards the ability to identify and exploit a repeatable edge, manage risk precisely, and execute consistently over a large number of trades — regardless of what any individual trade does.</p>
+
+      <div class="psych-insight">
+        <div class="psych-insight-label">A Crucial Distinction</div>
+        <p>The market doesn't know you exist. It has no opinion of your analysis, your effort, or your confidence. A trade failing is not the market "going against you." It is probability playing out. Understanding this removes enormous psychological weight from the trading process.</p>
+      </div>
+
+      <p>Price moves because of the aggregate decisions of every participant — from hedge funds moving billions to retail traders making decisions on a phone. At any given moment, the market reflects all available information plus the emotional state of every participant. <strong>This is why technical analysis works</strong> — not because charts predict the future, but because human psychology is remarkably consistent. The same patterns of fear, greed, hesitation and momentum appear again and again across different instruments and time periods.</p>
+
+      <p>Volatility is not your enemy — it is the source of opportunity. But volatile markets require adjusted expectations. A pair moving 200 pips in a session requires wider stops than normal, or smaller position sizes. The structure is the same; the parameters change. Many traders are destroyed not by bad strategies but by failing to adapt their position sizing to market conditions.</p>
+    </div>
+
+    <!-- SECTION 5 -->
+    <div class="psych-chapter" id="psych-s5">
+      <div class="psych-chapter-num">Chapter Five</div>
+      <h2>Discipline Is a <em>System, Not a Feeling</em></h2>
+
+      <p>One of the most persistent myths in trading is that disciplined traders simply feel more disciplined. That they have better willpower, stronger character, or less emotion. This is categorically false. Every trader — from retail beginners to the legends profiled in Market Wizards — experiences doubt, fear, greed, and the pull of impulsive decisions.</p>
+
+      <p>The difference is that consistent traders have built <strong>systems that remove the decision from the emotional moment.</strong> They define their criteria before they are watching a live chart. They set their risk before they are in a trade. They establish their exit before they have money on the line. When the moment comes, they are not deciding — they are executing a plan they made when they were calm.</p>
+
+      <div class="psych-quote">
+        <p>"Throughout my financial career, I have continually witnessed examples of other people that I have known being ruined by a failure to respect risk. If you don't take a hard look at risk, it will take you."</p>
+        <cite>Larry Hite — Market Wizards</cite>
+      </div>
+
+      <p>This is why trading journals are not optional for serious traders — they are the foundation of improvement. Without reviewing your decisions and your outcomes separately, you cannot identify where your process is sound and where emotion is leaking in. The traders profiled in Market Wizards universally tracked their performance in granular detail.</p>
+
+      <p><strong>Consistency is not about winning every trade.</strong> It is about executing your process identically on every trade — whether the last five were winners or losers. The moment you start trading larger because you're on a hot streak, or avoiding setups because you've just had three losses, you have broken the system. You are no longer trading your edge. You are trading your emotions.</p>
+
+      <div class="psych-insight">
+        <div class="psych-insight-label">The Hard Truth</div>
+        <p>Most retail traders lose not because they have bad strategies — they lose because they cannot execute their strategy consistently under emotional pressure. A mechanical tool that reflects your own historical criteria back at you, without adding opinion or emotion, addresses the execution layer of this problem directly.</p>
+      </div>
+    </div>
+
+    <!-- SECTION 6 -->
+    <div class="psych-chapter" id="psych-s6">
+      <div class="psych-chapter-num">Chapter Six</div>
+      <h2>Where TradeShadow <em>Fits In</em></h2>
+
+      <p>TradeShadow was built with these psychological principles explicitly in mind. The core problem it solves is not technical — it is psychological. Traders who have a working edge still miss setups, chase setups, and make inconsistent decisions. Not because their strategy is wrong, but because of the four forces that Douglas and the Market Wizards consistently describe.</p>
+
+      <div class="psych-grid">
+        <div class="psych-card"><h3>Eliminates FOMO</h3><p>When you know TradeShadow is watching your selected markets continuously, the fear of missing a move is significantly reduced. You don't need to stare at five charts simultaneously or check your phone every ten minutes. The setup will find you.</p></div>
+        <div class="psych-card"><h3>Removes Outside Noise</h3><p>TradeShadow shows you only setups that match your own historical criteria. It doesn't add opinions from other traders, analysts, or indicators you don't use. This directly reduces the cognitive load that leads to second-guessing and hesitation.</p></div>
+        <div class="psych-card"><h3>Reinforces Your Edge</h3><p>By surfacing setups that match what has historically worked for you, TradeShadow strengthens your belief in your own methodology. Confidence built on data from your own history is far more durable than confidence borrowed from someone else.</p></div>
+        <div class="psych-card"><h3>Provides Probabilistic Context</h3><p>The win probability percentage does what Douglas recommends — it frames each trade as a data point in a series, not an isolated event. Seeing "74% based on 18 similar trades" anchors your thinking in probabilities rather than certainty or hope.</p></div>
+      </div>
+
+      <p style="margin-top:24px">TradeShadow cannot give you discipline. It cannot prevent you from moving your stop loss or doubling your position size after a losing streak. The psychological work described in Trading in the Zone and Market Wizards is ultimately internal — it requires reflection, journaling, and deliberate practice over time.</p>
+
+      <p>What it can do is reduce the environmental pressures that trigger irrational decisions. Less chart-watching means less emotional exposure. Fewer conflicting signals means less doubt. A clear, data-based probability means less hope and fear. These reductions matter more than they might seem.</p>
+
+      <div style="margin-top:36px;display:flex;gap:14px">
+        <button class="btn" onclick="showView('auth','signup')">Start Free Trial</button>
+        <button class="btn btn-outline" onclick="showView('landing')">Back to Home</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- INTEGRATIONS                               -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="view" id="view-integrations">
+  <div class="integ-back" onclick="showView('landing')">← Back to TradeShadow</div>
+
+  <div class="integ-hero">
+    <div class="integ-hero-eyebrow">Platform Connections</div>
+    <h1>Connect Your Tools.<br><em>Keep Your Workflow.</em></h1>
+    <p>TradeShadow integrates with the platforms you already use. Connect your MetaTrader account through your broker, and let TradeShadow learn your style without disrupting how you trade.</p>
+  </div>
+
+  <div class="integ-body">
+
+    <!-- HOW CONNECTION WORKS -->
+    <div class="integ-section">
+      <div class="integ-section-label">How It Works</div>
+      <h2>The Connection Process</h2>
+      <p>Connecting TradeShadow to your trading account takes under five minutes. Here's exactly what happens at each step — including what TradeShadow can and cannot access.</p>
+
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num-circle">1</div>
+          <div class="step-item-content">
+            <h3>Select Your Broker & Platform</h3>
+            <p>Choose your broker from our list and select whether you're on MetaTrader 4 or MetaTrader 5. If your broker isn't listed, you can enter their server details manually — any broker that provides MT4 or MT5 access is compatible.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num-circle">2</div>
+          <div class="step-item-content">
+            <h3>Enter Your Investor Password</h3>
+            <p>Your broker provides two passwords for your MT4/5 account: a master (trading) password and an investor (read-only) password. TradeShadow only ever requires the investor password. This password is specifically designed by MetaQuotes to prevent any trade activity — it is physically incapable of placing, modifying or closing positions. Your master password is never requested, never stored, and never needed.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num-circle">3</div>
+          <div class="step-item-content">
+            <h3>TradeShadow Reads Your History</h3>
+            <p>Once connected, TradeShadow reads your closed trade history — every position you've opened and closed, along with the time, pair, direction, size, entry, exit, and result. This is the raw material the AI uses to learn your style. No live position data, no personal account details, no balance information beyond what you choose to share.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num-circle">4</div>
+          <div class="step-item-content">
+            <h3>Learning Period Begins</h3>
+            <p>The AI starts building your style profile immediately from historical data. Over the first month of active trading, it refines this profile with new trades, improving its understanding of your current strategy rather than just past patterns. You can trigger a manual re-analysis at any time from your dashboard.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num-circle">5</div>
+          <div class="step-item-content">
+            <h3>Scanner Goes Live</h3>
+            <p>Once your profile is ready, the scanner activates across your chosen pairs. Alerts are delivered via push notification and email the moment a matching setup is detected — with entry price, stop loss, take profit, and win probability already calculated.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="integ-notice">
+        <strong>Security note:</strong> Your investor password is encrypted at rest using AES-256 and transmitted only over TLS 1.3. TradeShadow never stores your master trading password. You can revoke access and delete all stored credentials at any time from your account settings.
+      </div>
+    </div>
+
+    <!-- PLATFORM INTEGRATIONS -->
+    <div class="integ-section">
+      <div class="integ-section-label">Supported Platforms</div>
+      <h2>Platform Integrations</h2>
+      <p>TradeShadow currently supports MetaTrader 4 and MetaTrader 5. TradingView integration is in active development and will be available to waitlist members first.</p>
+
+      <div class="integ-grid">
+        <div class="integ-card live">
+          <div class="integ-logo">MT4</div>
+          <h3>MetaTrader 4</h3>
+          <p>Full integration with MT4 via investor password. Reads complete trade history, account server details, and pair availability. Compatible with all MT4-enabled brokers. Supports all timeframes from M1 to Monthly.</p>
+          <div style="margin-top:16px;font-size:12px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">Requires: Server name · Account number · Investor password</div>
+        </div>
+        <div class="integ-card live">
+          <div class="integ-logo">MT5</div>
+          <h3>MetaTrader 5</h3>
+          <p>Full integration with MT5, including access to the expanded instrument range — stocks, indices, and commodities alongside forex pairs. Required for the Professional plan. All MT5-enabled brokers supported.</p>
+          <div style="margin-top:16px;font-size:12px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">Requires: Server name · Account number · Investor password</div>
+        </div>
+        <div class="integ-card beta">
+          <div class="integ-logo" style="font-size:20px;letter-spacing:0.05em">TradingView</div>
+          <h3>TradingView</h3>
+          <p>When integrated, TradeShadow will read your TradingView chart annotations, drawing tools, and alerts to further refine its understanding of your visual analysis style — identifying support/resistance levels and patterns you mark up repeatedly.</p>
+          <div style="margin-top:16px;font-size:12px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">Via TradingView Webhook API · Beta Q3 2025</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUPPORTED BROKERS -->
+    <div class="integ-section">
+      <div class="integ-section-label">Compatible Brokers</div>
+      <h2>Works With Your Broker</h2>
+      <p>Any broker offering MT4 or MT5 access is compatible with TradeShadow. Below are the most commonly used brokers our traders connect with. If yours isn't listed, it almost certainly still works.</p>
+
+      <div class="broker-grid">
+        <div class="broker-card"><div class="broker-initial">IC</div><div class="broker-info"><h4>IC Markets</h4><p>MT4 & MT5 · Raw spreads</p></div></div>
+        <div class="broker-card"><div class="broker-initial">PP</div><div class="broker-info"><h4>Pepperstone</h4><p>MT4 & MT5 · cTrader</p></div></div>
+        <div class="broker-card"><div class="broker-initial">OA</div><div class="broker-info"><h4>OANDA</h4><p>MT4 & MT5 · fxTrade</p></div></div>
+        <div class="broker-card"><div class="broker-initial">FP</div><div class="broker-info"><h4>FP Markets</h4><p>MT4 & MT5 · IRESS</p></div></div>
+        <div class="broker-card"><div class="broker-initial">XM</div><div class="broker-info"><h4>XM Global</h4><p>MT4 & MT5 · XM Ultra Low</p></div></div>
+        <div class="broker-card"><div class="broker-initial">EX</div><div class="broker-info"><h4>Exness</h4><p>MT4 & MT5 · Standard</p></div></div>
+        <div class="broker-card"><div class="broker-initial">AX</div><div class="broker-info"><h4>Axiory</h4><p>MT4 & MT5 · Nano</p></div></div>
+        <div class="broker-card"><div class="broker-initial">FX</div><div class="broker-info"><h4>FXCM</h4><p>MT4 · Trading Station</p></div></div>
+        <div class="broker-card"><div class="broker-initial">GO</div><div class="broker-info"><h4>GO Markets</h4><p>MT4 & MT5 · cTrader</p></div></div>
+        <div class="broker-card"><div class="broker-initial">BL</div><div class="broker-info"><h4>BlackBull Markets</h4><p>MT4 & MT5 · ECN</p></div></div>
+        <div class="broker-card"><div class="broker-initial">TI</div><div class="broker-info"><h4>Tickmill</h4><p>MT4 & MT5 · Pro</p></div></div>
+        <div class="broker-card" style="border-style:dashed"><div class="broker-initial" style="font-size:20px;border-style:dashed">+</div><div class="broker-info"><h4>Your Broker</h4><p>If it runs MT4/MT5, it works</p></div></div>
+      </div>
+    </div>
+
+    <!-- TRADINGVIEW DETAIL -->
+    <div class="integ-section">
+      <div class="integ-section-label">Coming Soon — TradingView Integration</div>
+      <h2>TradingView: <em>Learning Your Chart Markups</em></h2>
+      <p>TradingView is where many traders do the bulk of their visual analysis — drawing support and resistance levels, marking up key zones, annotating trend lines and patterns. The upcoming TradingShadow TradingView integration will read these markups to add another layer of personalisation to your style profile.</p>
+
+      <div class="psych-grid">
+        <div class="psych-card">
+          <h3>Chart Annotation Learning</h3>
+          <p>TradeShadow will identify the levels you consistently mark across multiple charts — the zones you return to repeatedly — and factor these into its understanding of where you look for entries and reactions.</p>
+        </div>
+        <div class="psych-card">
+          <h3>Alert Cross-Reference</h3>
+          <p>Your existing TradingView price alerts will be cross-referenced against TradeShadow's scanner results. When a TradeShadow setup coincides with a level you've already flagged in TradingView, the match confidence score increases.</p>
+        </div>
+        <div class="psych-card">
+          <h3>Indicator Preference Detection</h3>
+          <p>The indicators you have active on your charts tell TradeShadow a great deal about what you value. RSI on every chart? It will weight RSI conditions more heavily in matching. Only price action? It will prioritise structure and candlestick patterns.</p>
+        </div>
+        <div class="psych-card">
+          <h3>Seamless Workflow</h3>
+          <p>Rather than replacing TradingView, the integration deepens TradeShadow's knowledge of your style. You continue working in TradingView as normal. The integration runs in the background and feeds data directly into your profile.</p>
+        </div>
+      </div>
+
+      <div style="margin-top:24px">
+        <div class="integ-notice">
+          <strong>Join the waitlist</strong> to be notified when TradingView integration enters beta. Waitlist members will receive early access and a discounted Professional plan for the first three months.
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:14px;margin-top:8px;padding-bottom:20px">
+      <button class="btn" onclick="showView('auth','signup')">Get Started</button>
+      <button class="btn btn-outline" onclick="showView('landing')">Back to Home</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- AUTH                                       -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="view" id="view-auth">
+  <div class="auth-logo">TradeShadow</div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</div>
+      <div class="auth-tab" id="tab-signup" onclick="switchTab('signup')">Create Account</div>
+    </div>
+
+    <div id="form-login">
+      <div class="form-group"><label>Email Address</label><input type="email" id="login-email" placeholder="you@example.com"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••"></div>
+      <div style="margin-top:26px"><button class="btn btn-full" onclick="doLogin()">Sign In</button></div>
+      <p class="auth-footer" style="margin-top:16px"><a onclick="showView('landing')">← Back to home</a></p>
+    </div>
+
+    <div id="form-signup" style="display:none">
+      <div class="form-group"><label>Full Name</label><input type="text" id="sig-name" placeholder="Your name"></div>
+      <div class="form-group"><label>Email Address</label><input type="email" id="sig-email" placeholder="you@example.com"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="sig-pass" placeholder="Create a password"></div>
+      <div class="form-group">
+        <label>Experience Level</label>
+        <select id="sig-level">
+          <option value="">Select your level</option>
+          <option>Beginner (under 1 year)</option>
+          <option>Intermediate (1–3 years)</option>
+          <option>Advanced (3+ years)</option>
+          <option>Professional / Prop Trader</option>
+        </select>
+      </div>
+      <div style="margin-top:26px"><button class="btn btn-full" onclick="doSignup()">Create Account</button></div>
+      <p class="auth-footer" style="margin-top:16px"><a onclick="showView('landing')">← Back to home</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- CONNECT BROKER                             -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="view" id="view-connect">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo" onclick="showView('landing')">TradeShadow</div>
+      <ul class="sidebar-nav">
+        <li class="active" id="snav-connect"><button onclick="goApp('connect')"><span class="nav-icon">⬡</span> Broker Setup</button></li>
+        <li id="snav-analyse"><button onclick="goApp('analyse')"><span class="nav-icon">◎</span> Analyse Style</button></li>
+        <li id="snav-profile"><button onclick="goApp('profile')"><span class="nav-icon">◈</span> My Profile</button></li>
+        <li id="snav-scanner"><button onclick="goApp('scanner')"><span class="nav-icon">◉</span> Scanner</button></li>
+      </ul>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-user">
+        <div class="sidebar-user-name" id="sb-name">—</div>
+        <div class="sidebar-user-detail" id="sb-broker">No broker connected</div>
+      </div>
+    </div>
+    <div class="main-content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Connect Your Broker</div>
+          <div class="page-subtitle">Link your MetaTrader account so TradeShadow can start learning your style</div>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="connect-grid">
+          <div>
+            <div class="card">
+              <div class="card-title">Select Broker</div>
+              <div class="card-subtitle">Choose the broker you trade with</div>
+              <div class="broker-list">
+                <div class="broker-option" onclick="pickBroker(this,'IC Markets')"><div class="broker-dot"></div>IC Markets</div>
+                <div class="broker-option" onclick="pickBroker(this,'Pepperstone')"><div class="broker-dot"></div>Pepperstone</div>
+                <div class="broker-option" onclick="pickBroker(this,'OANDA')"><div class="broker-dot"></div>OANDA</div>
+                <div class="broker-option" onclick="pickBroker(this,'FP Markets')"><div class="broker-dot"></div>FP Markets</div>
+                <div class="broker-option" onclick="pickBroker(this,'XM Global')"><div class="broker-dot"></div>XM Global</div>
+                <div class="broker-option" onclick="pickBroker(this,'Exness')"><div class="broker-dot"></div>Exness</div>
+                <div class="broker-option" onclick="pickBroker(this,'Axiory')"><div class="broker-dot"></div>Axiory</div>
+                <div class="broker-option" onclick="pickBroker(this,'Other')"><div class="broker-dot"></div>Other</div>
+              </div>
+            </div>
+            <div class="card" style="margin-top:14px">
+              <div class="card-title">Platform</div>
+              <div class="card-subtitle">Select your trading platform version</div>
+              <div style="display:flex;gap:10px" id="platform-opts">
+                <div class="broker-option selected" style="flex:1" onclick="pickPlatform(this,'MT4')"><div class="broker-dot"></div>MetaTrader 4</div>
+                <div class="broker-option" style="flex:1" onclick="pickPlatform(this,'MT5')"><div class="broker-dot"></div>MetaTrader 5</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">MT4/5 Credentials</div>
+              <div class="card-subtitle">Your account details from your broker's welcome email</div>
+              <div class="form-group"><label>Server Name</label><input type="text" id="mt-server" placeholder="e.g. ICMarkets-Live01"></div>
+              <div class="form-group"><label>Account Number</label><input type="text" id="mt-account" placeholder="e.g. 12345678"></div>
+              <div class="form-group"><label>Investor Password (Read-only)</label><input type="password" id="mt-pass" placeholder="Your investor password"></div>
+              <div class="info-box">
+                <strong>Read-only access only.</strong> TradeShadow uses your investor password which cannot place or modify trades. Your master trading password is never needed or requested.
+              </div>
+              <div id="conn-status" style="display:none"></div>
+              <div style="margin-top:22px;display:flex;gap:10px">
+                <button class="btn" onclick="doConnect()">Connect Account</button>
+                <button class="btn btn-outline" onclick="goApp('analyse')">Skip for now</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- ANALYSE STYLE                              -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="view" id="view-analyse">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo" onclick="showView('landing')">TradeShadow</div>
+      <ul class="sidebar-nav">
+        <li id="snav2-connect"><button onclick="goApp('connect')"><span class="nav-icon">⬡</span> Broker Setup</button></li>
+        <li class="active" id="snav2-analyse"><button onclick="goApp('analyse')"><span class="nav-icon">◎</span> Analyse Style</button></li>
+        <li id="snav2-profile"><button onclick="goApp('profile')"><span class="nav-icon">◈</span> My Profile</button></li>
+        <li id="snav2-scanner"><button onclick="goApp('scanner')"><span class="nav-icon">◉</span> Scanner</button></li>
+      </ul>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-user">
+        <div class="sidebar-user-name" id="sb2-name">—</div>
+        <div class="sidebar-user-detail" id="sb2-broker">No broker connected</div>
+      </div>
+    </div>
+    <div class="main-content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Analyse My Trading Style</div>
+          <div class="page-subtitle">Paste your MT4/5 trade history — Claude will build your personal strategy profile</div>
+        </div>
+      </div>
+      <div class="page-body">
+        <div class="analyse-grid">
+          <div>
+            <div class="step-indicator">
+              <div class="step-num">01</div>
+              <div class="step-content">
+                <h3>Export from MetaTrader</h3>
+                <p>Open MetaTrader → Account History tab → right-click → Save as Detailed Report. Open the file, copy all the trade rows, and paste them to the right.</p>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div class="step-indicator">
+              <div class="step-num">02</div>
+              <div class="step-content">
+                <h3>Or load sample data</h3>
+                <p>No export ready? Use our realistic sample trade history to see exactly how TradeShadow analyses your style.</p>
+              </div>
+            </div>
+            <button class="btn btn-outline" style="margin-top:16px;width:100%" onclick="loadSample()">Load Sample Trade History</button>
+            <div class="divider"></div>
+            <div class="info-box">
+              <strong>What does TradeShadow extract?</strong><br><br>
+              Entry timing, preferred sessions, favourite pairs, risk-to-reward ratios, average holding times, chart pattern preferences, and winning conditions — everything that defines your personal edge.
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title">Trade History</div>
+              <div class="card-subtitle">Paste your MT4/5 export or use the sample data</div>
+              <div id="table-wrap" style="overflow-x:auto;display:none;margin-bottom:12px">
+                <div class="table-note" id="trade-count-note"></div>
+                <table class="history-table" id="hist-table">
+                  <thead><tr><th>Ticket</th><th>Open Time</th><th>Type</th><th>Lots</th><th>Symbol</th><th>Open</th><th>Close</th><th>Profit</th></tr></thead>
+                  <tbody id="hist-body"></tbody>
+                </table>
+              </div>
+              <textarea id="hist-input" oninput="onHistInput()" placeholder="Paste your MetaTrader trade history here...
+
+Expected format (pipe or tab separated):
+Ticket | Open Time | Type | Size | Symbol | Open Price | S/L | T/P | Close Time | Close Price | Swap | Profit
+
+Or simply click 'Load Sample Trade History' on the left to try a demo."></textarea>
+              <div style="margin-top:14px;display:flex;gap:12px;align-items:center">
+                <button class="btn" onclick="runAnalysis()">Analyse My Style →</button>
+                <span id="trade-count" style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PROFILE                                    -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="view" id="view-profile">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo" onclick="showView('landing')">TradeShadow</div>
+      <ul class="sidebar-nav">
+        <li id="snav3-connect"><button onclick="goApp('connect')"><span class="nav-icon">⬡</span> Broker Setup</button></li>
+        <li id="snav3-analyse"><button onclick="goApp('analyse')"><span class="nav-icon">◎</span> Analyse Style</button></li>
+        <li class="active" id="snav3-profile"><button onclick="goApp('profile')"><span class="nav-icon">◈</span> My Profile</button></li>
+        <li id="snav3-scanner"><button onclick="goApp('scanner')"><span class="nav-icon">◉</span> Scanner</button></li>
+      </ul>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-user">
+        <div class="sidebar-user-name" id="sb3-name">—</div>
+        <div class="sidebar-user-detail" id="sb3-broker">No broker connected</div>
+      </div>
+    </div>
+    <div class="main-content" id="profile-main">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCANNER                                    -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="view" id="view-scanner">
+  <div class="app-layout">
+    <div class="sidebar">
+      <div class="sidebar-logo" onclick="showView('landing')">TradeShadow</div>
+      <ul class="sidebar-nav">
+        <li id="snav4-connect"><button onclick="goApp('connect')"><span class="nav-icon">⬡</span> Broker Setup</button></li>
+        <li id="snav4-analyse"><button onclick="goApp('analyse')"><span class="nav-icon">◎</span> Analyse Style</button></li>
+        <li id="snav4-profile"><button onclick="goApp('profile')"><span class="nav-icon">◈</span> My Profile</button></li>
+        <li class="active" id="snav4-scanner"><button onclick="goApp('scanner')"><span class="nav-icon">◉</span> Scanner</button></li>
+      </ul>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-user">
+        <div class="sidebar-user-name" id="sb4-name">—</div>
+        <div class="sidebar-user-detail" id="sb4-broker">No broker connected</div>
+      </div>
+    </div>
+    <div class="main-content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Market Scanner</div>
+          <div class="page-subtitle" id="scanner-sub">Scanning 52 pairs against your strategy profile</div>
+        </div>
+        <button class="btn btn-sm" onclick="runScanner()">↺ Refresh Scan</button>
+      </div>
+      <div class="page-body" id="scanner-body">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+const S = {
+  user: null,
+  broker: null,
+  platform: 'MT4',
+  profile: null,
+  results: [],
+  filter: 'all'
+};
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function showView(id, tab) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  if (id === 'auth' && tab) switchTab(tab);
+}
+
+function goApp(id) {
+  syncSidebar();
+  showView(id);
+  if (id === 'profile') renderProfile();
+  if (id === 'scanner') {
+    if (S.profile && !S.results.length) runScanner();
+    else renderScanner();
+  }
+}
+
+function syncSidebar() {
+  const n = S.user ? S.user.name : '—';
+  const b = S.broker ? `${S.broker} · ${S.platform}` : 'No broker connected';
+  for (let i = 1; i <= 4; i++) {
+    const sn = document.getElementById('sb' + (i > 1 ? i : '') + '-name');
+    const sb = document.getElementById('sb' + (i > 1 ? i : '') + '-broker');
+    if (sn) sn.textContent = n;
+    if (sb) sb.textContent = b;
+  }
+  // update sb-name / sb-broker (no number for view-connect sidebar)
+  const sn0 = document.getElementById('sb-name');
+  const sb0 = document.getElementById('sb-broker');
+  if (sn0) sn0.textContent = n;
+  if (sb0) sb0.textContent = b;
+}
+
+function switchTab(t) {
+  document.getElementById('tab-login').classList.toggle('active', t === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', t === 'signup');
+  document.getElementById('form-login').style.display = t === 'login' ? '' : 'none';
+  document.getElementById('form-signup').style.display = t === 'signup' ? '' : 'none';
+}
+
+// ═══════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════
+function doLogin() {
+  const e = document.getElementById('login-email').value.trim();
+  const p = document.getElementById('login-pass').value;
+  if (!e || !p) { toast('Please fill in all fields'); return; }
+  S.user = { name: e.split('@')[0], email: e };
+  syncSidebar();
+  toast('Welcome back!');
+  goApp('connect');
+}
+
+function doSignup() {
+  const name = document.getElementById('sig-name').value.trim();
+  const email = document.getElementById('sig-email').value.trim();
+  const pass = document.getElementById('sig-pass').value;
+  const level = document.getElementById('sig-level').value;
+  if (!name || !email || !pass || !level) { toast('Please fill in all fields'); return; }
+  S.user = { name, email, level };
+  syncSidebar();
+  toast('Account created — connect your broker to get started');
+  goApp('connect');
+}
+
+// ═══════════════════════════════════════════
+// BROKER CONNECT
+// ═══════════════════════════════════════════
+function pickBroker(el, name) {
+  document.querySelectorAll('#view-connect .broker-list .broker-option').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  S.broker = name;
+}
+
+function pickPlatform(el, name) {
+  document.querySelectorAll('#platform-opts .broker-option').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  S.platform = name;
+}
+
+function doConnect() {
+  const srv = document.getElementById('mt-server').value.trim();
+  const acc = document.getElementById('mt-account').value.trim();
+  const pw = document.getElementById('mt-pass').value;
+  if (!S.broker) { toast('Please select a broker'); return; }
+  if (!srv || !acc || !pw) { toast('Please fill in your MT credentials'); return; }
+
+  const el = document.getElementById('conn-status');
+  el.style.display = 'flex';
+  el.className = 'connect-status loading';
+  el.innerHTML = `<span style="animation:spin 1s linear infinite;display:inline-block">○</span> Connecting to ${S.broker}...`;
+
+  setTimeout(() => {
+    el.className = 'connect-status success';
+    el.innerHTML = `✓ Connected · ${S.broker} · Account ${acc.slice(0,4)}****`;
+    syncSidebar();
+    toast(`${S.broker} connected successfully`);
+    setTimeout(() => goApp('analyse'), 1600);
+  }, 2200);
+}
+
+// ═══════════════════════════════════════════
+// SAMPLE DATA
+// ═══════════════════════════════════════════
+const SAMPLE = `Ticket | Open Time | Type | Size | Symbol | Open Price | S/L | T/P | Close Time | Close Price | Swap | Profit
+12847621 | 2024.11.04 09:12 | buy | 0.50 | GBPUSD | 1.29845 | 1.29200 | 1.31000 | 2024.11.04 14:47 | 1.30612 | -0.12 | 383.50
+12847890 | 2024.11.05 08:45 | buy | 0.75 | EURUSD | 1.07234 | 1.06800 | 1.08200 | 2024.11.05 16:30 | 1.07890 | -0.18 | 492.00
+12848102 | 2024.11.06 09:05 | sell | 0.50 | USDJPY | 153.450 | 154.200 | 151.800 | 2024.11.06 15:20 | 152.110 | 0.00 | 447.00
+12848445 | 2024.11.07 08:58 | buy | 1.00 | GBPUSD | 1.30102 | 1.29500 | 1.31500 | 2024.11.07 17:45 | 1.31480 | -0.22 | 1378.00
+12848790 | 2024.11.08 09:20 | sell | 0.50 | EURUSD | 1.07820 | 1.08300 | 1.06800 | 2024.11.08 13:15 | 1.07200 | 0.00 | 310.00
+12849001 | 2024.11.11 08:40 | buy | 0.75 | GBPJPY | 195.230 | 194.100 | 197.500 | 2024.11.11 16:55 | 196.890 | -0.35 | 931.88
+12849234 | 2024.11.12 09:10 | buy | 0.50 | EURUSD | 1.06950 | 1.06400 | 1.08100 | 2024.11.12 11:30 | 1.06600 | 0.00 | -175.00
+12849567 | 2024.11.13 09:02 | sell | 1.00 | GBPUSD | 1.29780 | 1.30400 | 1.28200 | 2024.11.13 15:40 | 1.28350 | -0.28 | 1430.00
+12849801 | 2024.11.14 08:55 | buy | 0.50 | AUDUSD | 0.64820 | 0.64200 | 0.65900 | 2024.11.14 17:10 | 0.65640 | -0.08 | 410.00
+12850023 | 2024.11.15 09:15 | sell | 0.75 | USDJPY | 154.890 | 155.600 | 152.500 | 2024.11.15 14:20 | 153.240 | 0.00 | 926.25
+12850345 | 2024.11.18 08:50 | buy | 1.00 | GBPUSD | 1.26890 | 1.26200 | 1.28400 | 2024.11.18 16:35 | 1.28200 | -0.30 | 1310.00
+12850678 | 2024.11.19 09:05 | sell | 0.50 | EURUSD | 1.05980 | 1.06550 | 1.04800 | 2024.11.19 13:50 | 1.05300 | 0.00 | 340.00
+12850901 | 2024.11.20 08:45 | buy | 0.75 | GBPJPY | 193.450 | 192.300 | 195.800 | 2024.11.20 17:20 | 195.200 | -0.42 | 1312.50
+12851123 | 2024.11.21 09:20 | sell | 0.50 | GBPUSD | 1.25640 | 1.26300 | 1.24100 | 2024.11.21 14:05 | 1.24230 | 0.00 | 705.00
+12851456 | 2024.11.22 08:58 | buy | 1.00 | EURUSD | 1.04780 | 1.04100 | 1.06200 | 2024.11.22 16:45 | 1.04200 | -0.35 | -580.00
+12851789 | 2024.11.25 09:10 | sell | 0.75 | USDJPY | 155.230 | 156.000 | 153.400 | 2024.11.25 15:30 | 153.820 | 0.00 | 1057.50
+12852012 | 2024.11.26 08:42 | buy | 0.50 | GBPUSD | 1.25890 | 1.25200 | 1.27400 | 2024.11.26 17:15 | 1.27280 | -0.18 | 695.00
+12852345 | 2024.11.27 09:08 | sell | 1.00 | EURUSD | 1.05450 | 1.06100 | 1.04000 | 2024.11.27 12:55 | 1.04150 | 0.00 | 1300.00`;
+
+function loadSample() {
+  document.getElementById('hist-input').value = SAMPLE;
+  buildTablePreview(SAMPLE);
+  toast('18 sample trades loaded');
+}
+
+function onHistInput() {
+  const v = document.getElementById('hist-input').value;
+  const lines = v.trim().split('\n').filter(l => l.trim() && !l.startsWith('Ticket'));
+  if (lines.length > 0) buildTablePreview(v);
+  document.getElementById('trade-count').textContent = lines.length ? lines.length + ' trades' : '';
+}
+
+function buildTablePreview(text) {
+  const lines = text.trim().split('\n');
+  const dataLines = lines.filter(l => l.trim() && !/^Ticket/i.test(l)).slice(0, 5);
+  const tbody = document.getElementById('hist-body');
+  tbody.innerHTML = '';
+  dataLines.forEach(line => {
+    const p = line.split('|').map(x => x.trim());
+    if (p.length < 8) return;
+    const type = (p[2] || '').toLowerCase();
+    const profit = parseFloat(p[11] || p[p.length - 1]) || 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="mono">${p[0]}</td>
+      <td>${p[1]}</td>
+      <td class="${type === 'buy' ? 'td-buy' : 'td-sell'}">${type.toUpperCase()}</td>
+      <td>${p[3]}</td>
+      <td><strong>${p[4]}</strong></td>
+      <td class="mono">${p[5]}</td>
+      <td class="mono">${p[9] || p[8] || ''}</td>
+      <td class="mono ${profit >= 0 ? 'td-pos' : 'td-neg'}">${profit >= 0 ? '+' : ''}${profit.toFixed(2)}</td>`;
+    tbody.appendChild(tr);
+  });
+  const total = lines.filter(l => l.trim() && !/^Ticket/i.test(l)).length;
+  document.getElementById('trade-count-note').textContent = `Showing first 5 of ${total} trades`;
+  document.getElementById('trade-count').textContent = total + ' trades';
+  document.getElementById('table-wrap').style.display = '';
+}
+
+// ═══════════════════════════════════════════
+// BROWSER-SAFE ANALYSE STYLE
+// This version does not call Claude/Anthropic from the browser.
+// It runs locally so it works on Netlify, Safari, Chrome, iPhone, Android, etc.
+// ═══════════════════════════════════════════
+function parseTradeHistory(input) {
+  return input.trim().split('\n')
+    .map(line => line.trim())
+    .filter(line => line && !/^Ticket/i.test(line))
+    .map(line => {
+      const p = line.split('|').map(x => x.trim());
+      const open = Number(p[5]);
+      const sl = Number(p[6]);
+      const tp = Number(p[7]);
+      const close = Number(p[9]);
+      const profit = Number(p[11] || p[p.length - 1]) || 0;
+      const size = Number(p[3]) || 0;
+      const type = (p[2] || '').toLowerCase();
+      const symbol = p[4] || 'UNKNOWN';
+      const openDate = parseTradeDate(p[1]);
+      const closeDate = parseTradeDate(p[8]);
+      const holdHours = openDate && closeDate ? Math.max(0.25, (closeDate - openDate) / 36e5) : 8;
+      return { ticket:p[0], openTime:p[1], type, size, symbol, open, sl, tp, close, profit, holdHours, openDate };
+    })
+    .filter(t => t.symbol !== 'UNKNOWN');
+}
+
+function parseTradeDate(value) {
+  if (!value) return null;
+  const clean = value.replace(/\./g, '-').replace(' ', 'T');
+  const d = new Date(clean);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function average(nums) {
+  const valid = nums.filter(n => Number.isFinite(n));
+  return valid.length ? valid.reduce((a,b)=>a+b,0) / valid.length : 0;
+}
+
+function mode(values) {
+  const counts = {};
+  values.forEach(v => counts[v] = (counts[v] || 0) + 1);
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1])[0]?.[0] || '';
+}
+
+function getSession(date) {
+  if (!date) return 'London';
+  const h = date.getHours();
+  if (h >= 7 && h < 12) return 'London';
+  if (h >= 12 && h < 16) return 'London-NY Overlap';
+  if (h >= 16 && h < 22) return 'New York';
+  return 'Asian';
+}
+
+function inferRiskReward(trades) {
+  const ratios = trades.map(t => {
+    const risk = Math.abs(t.open - t.sl);
+    const reward = Math.abs(t.tp - t.open);
+    return risk > 0 && reward > 0 ? reward / risk : null;
+  }).filter(Boolean);
+  const rr = average(ratios) || 2;
+  return `1:${rr.toFixed(1)}`;
+}
+
+function generateLocalProfile(input) {
+  const trades = parseTradeHistory(input);
+  const total = trades.length;
+  const winners = trades.filter(t => t.profit > 0);
+  const winRate = total ? Math.round((winners.length / total) * 100) : 0;
+  const avgHold = Math.round(average(trades.map(t => t.holdHours)) * 10) / 10;
+
+  const pairCounts = {};
+  const pairProfit = {};
+  trades.forEach(t => {
+    pairCounts[t.symbol] = (pairCounts[t.symbol] || 0) + 1;
+    pairProfit[t.symbol] = (pairProfit[t.symbol] || 0) + t.profit;
+  });
+  const preferred = Object.keys(pairCounts).sort((a,b) => pairCounts[b] - pairCounts[a]).slice(0,4);
+  const bestPair = Object.keys(pairProfit).sort((a,b) => pairProfit[b] - pairProfit[a])[0] || preferred[0] || 'GBPUSD';
+  const sessions = [...new Set(trades.map(t => getSession(t.openDate)))].slice(0,4);
+  const mainDirection = mode(trades.map(t => t.type));
+  const rr = inferRiskReward(trades);
+  const sizes = trades.map(t => t.size).filter(Boolean);
+  const minSize = sizes.length ? Math.min(...sizes).toFixed(2) : '0.50';
+  const maxSize = sizes.length ? Math.max(...sizes).toFixed(2) : '1.00';
+
+  const styleName = sessions.includes('London')
+    ? 'The London Setup Hunter'
+    : mainDirection === 'sell'
+      ? 'The Structure Reversal Specialist'
+      : 'The Momentum Continuation Trader';
+
+  return {
+    style_name: styleName,
+    style_summary: `This profile shows a trader who favours ${preferred.slice(0,2).join(' and ') || 'major FX pairs'}, usually trading during the ${sessions[0] || 'London'} session. The style leans toward clean technical setups with defined stops, targets, and a measured risk-to-reward profile.`,
+    pairs_preferred: preferred.length ? preferred : ['GBPUSD','EURUSD','USDJPY'],
+    sessions: sessions.length ? sessions : ['London'],
+    avg_hold_hours: avgHold || 8,
+    entry_style: mainDirection === 'sell' ? 'Reversal or rejection from key level' : 'Pullback, breakout, or continuation from key level',
+    indicators_likely: ['Support & Resistance', 'Market Structure', 'Session Timing', 'Risk:Reward', 'Price Action'],
+    risk_reward: rr,
+    win_rate: `${winRate}%`,
+    lot_sizing: `${minSize}–${maxSize} lots`,
+    best_pair: bestPair,
+    setup_types: [
+      'Session-based entries around London or London-New York liquidity',
+      'Defined stop-loss and take-profit levels before entry',
+      `Preference for ${preferred[0] || 'major FX'} setups with repeatable structure`
+    ],
+    total_trades: total,
+    profitable_trades: winners.length,
+    strengths: [
+      'Clear risk control with stop loss and take profit levels',
+      'Consistent focus on a small group of markets',
+      'Strongest performance appears around repeated, familiar setups'
+    ],
+    patterns: [
+      `Most traded pair: ${preferred[0] || 'GBPUSD'}`,
+      `Best performing pair: ${bestPair}`,
+      `Average hold time: ${avgHold || 8} hours`
+    ]
+  };
+}
+
+async function runAnalysis() {
+  const input = document.getElementById('hist-input').value.trim();
+  if (input.length < 80) { toast('Please paste your trade history first, or load the sample data'); return; }
+
+  showLoader('Analysing your trading style...', 'Running browser-safe local analysis');
+  try {
+    setTimeout(() => {
+      S.profile = generateLocalProfile(input);
+      hideLoader();
+      toast('Style profile generated');
+      goApp('profile');
+    }, 700);
+  } catch (e) {
+    hideLoader();
+    console.error(e);
+    toast('Analysis failed — check your trade history format');
+  }
+}
+
+// ═══════════════════════════════════════════
+// PROFILE RENDER
+// ═══════════════════════════════════════════
+function renderProfile() {
+  const main = document.getElementById('profile-main');
+  if (!S.profile) {
+    main.innerHTML = `
+      <div class="page-header"><div><div class="page-title">My Trading Profile</div><div class="page-subtitle">Analyse your trade history to generate your profile</div></div></div>
+      <div class="page-body"><div class="empty-state"><h3>No profile yet</h3><p>Head to Analyse Style to generate your trading profile</p><button class="btn" style="margin-top:24px" onclick="goApp('analyse')">Analyse My Style →</button></div></div>`;
+    return;
+  }
+
+  const p = S.profile;
+  const holdLabel = p.avg_hold_hours < 4 ? 'Scalper / Intraday' : p.avg_hold_hours < 12 ? 'Intraday Trader' : p.avg_hold_hours < 48 ? 'Day/Swing Trader' : 'Swing Trader';
+
+  main.innerHTML = `
+    <div class="profile-hero">
+      <div class="profile-hero-eyebrow">Your Trading Identity · Generated by TradeShadow AI</div>
+      <h2>${p.style_name}</h2>
+      <p>${p.style_summary}</p>
+    </div>
+    <div class="page-body" style="padding-top:28px">
+      <div class="profile-grid">
+        <div class="profile-stat">
+          <div class="stat-label">Win Rate</div>
+          <div class="stat-value" style="color:var(--green)">${p.win_rate}</div>
+          <div class="stat-sub">${p.profitable_trades} of ${p.total_trades} trades profitable</div>
+        </div>
+        <div class="profile-stat">
+          <div class="stat-label">Risk : Reward</div>
+          <div class="stat-value">${p.risk_reward}</div>
+          <div class="stat-sub">Average per trade</div>
+        </div>
+        <div class="profile-stat">
+          <div class="stat-label">Avg Hold Time</div>
+          <div class="stat-value">${p.avg_hold_hours}<span style="font-size:18px">h</span></div>
+          <div class="stat-sub">${holdLabel}</div>
+        </div>
+        <div class="profile-stat">
+          <div class="stat-label">Best Pair</div>
+          <div class="stat-value" style="font-size:22px;font-family:'JetBrains Mono',monospace">${p.best_pair}</div>
+          <div class="stat-sub">Highest performance</div>
+        </div>
+        <div class="profile-stat">
+          <div class="stat-label">Entry Style</div>
+          <div class="stat-value" style="font-size:19px">${p.entry_style}</div>
+          <div class="stat-sub">Primary approach</div>
+        </div>
+        <div class="profile-stat">
+          <div class="stat-label">Position Sizing</div>
+          <div class="stat-value" style="font-size:19px">${p.lot_sizing}</div>
+          <div class="stat-sub">Typical lot range</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+        <div class="card">
+          <div class="card-title">Preferred Pairs</div>
+          <div class="card-subtitle">Markets you trade most frequently</div>
+          <div class="profile-tags">
+            ${(p.pairs_preferred || []).map((pair, i) => `<span class="tag ${i === 0 ? 'tag-dark' : ''}">${pair}</span>`).join('')}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Trading Sessions</div>
+          <div class="card-subtitle">When you are most active</div>
+          <div class="profile-tags">
+            ${(p.sessions || []).map(s => `<span class="tag">${s}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+        <div class="card">
+          <div class="card-title">Setup Types</div>
+          <div class="card-subtitle">Patterns you consistently take</div>
+          ${(p.setup_types || []).map(s => `<div class="bullet-item"><div class="bullet-dot"></div><div class="bullet-text">${s}</div></div>`).join('')}
+        </div>
+        <div class="card">
+          <div class="card-title">Identified Strengths</div>
+          <div class="card-subtitle">What the AI found in your execution data</div>
+          ${(p.strengths || []).map(s => `<div class="bullet-item"><div class="bullet-check">✓</div><div class="bullet-text">${s}</div></div>`).join('')}
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:28px">
+        <div class="card-title">Indicators & Tools Detected</div>
+        <div class="card-subtitle">TradeShadow will scan for these conditions when matching setups to your profile</div>
+        <div class="profile-tags">
+          ${(p.indicators_likely || []).map(ind => `<span class="tag">${ind}</span>`).join('')}
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px">
+        <button class="btn" onclick="goApp('scanner')">Launch Scanner →</button>
+        <button class="btn btn-outline" onclick="goApp('analyse')">Re-analyse History</button>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+// MARKET CONDITIONS (simulated live data)
+// ═══════════════════════════════════════════
+const MARKETS = [
+  { pair:'GBPUSD', price:'1.2734', chg:'+0.42%', rsi:34, trend:'Downtrend correction', level:'H4 support at 1.2720', session:'London', vol:'High', pattern:'Bullish engulfing forming on H1, inside day on D1, price compressing into support', tf:'H4/H1' },
+  { pair:'EURUSD', price:'1.0812', chg:'+0.18%', rsi:42, trend:'Range-bound', level:'Weekly support at 1.0800', session:'London', vol:'Medium', pattern:'Double bottom forming on H4, RSI bullish divergence, London momentum building', tf:'H4' },
+  { pair:'USDJPY', price:'155.42', chg:'-0.31%', rsi:68, trend:'Uptrend', level:'Resistance at 156.00 round number', session:'London–NY', vol:'High', pattern:'Break of structure bearish on H1, lower high printing, retest in progress', tf:'H1' },
+  { pair:'GBPJPY', price:'198.15', chg:'+0.55%', rsi:38, trend:'Downtrend correction', level:'Demand zone 197.50–198.00', session:'London', vol:'High', pattern:'Clean pullback to broken resistance now acting as support, London open confluence', tf:'H4/H1' },
+  { pair:'AUDUSD', price:'0.6421', chg:'-0.22%', rsi:71, trend:'Uptrend near exhaustion', level:'Supply zone 0.6450–0.6480', session:'NY', vol:'Low', pattern:'Overbought H4 RSI with rejection candle at supply zone, bearish momentum divergence', tf:'H4' },
+  { pair:'USDCAD', price:'1.3892', chg:'+0.08%', rsi:55, trend:'Range', level:'Mid-range, no key level', session:'NY', vol:'Low', pattern:'Consolidation with no defined structure, low conviction, choppy price action', tf:'D1' },
+  { pair:'NZDUSD', price:'0.5912', chg:'-0.14%', rsi:48, trend:'Downtrend', level:'Recent swing low 0.5890', session:'Asian', vol:'Low', pattern:'Weak bearish momentum, inside Asian range, no clear setup for London session', tf:'H4' },
+  { pair:'EURJPY', price:'168.24', chg:'+0.29%', rsi:44, trend:'Downtrend', level:'Retest of broken support 168.00', session:'London', vol:'High', pattern:'Clean bearish BOS on H4, retest of structure now in progress with bearish close', tf:'H1' },
+  { pair:'XAUUSD', price:'3248.50', chg:'+0.68%', rsi:36, trend:'Correction in uptrend', level:'Daily demand zone 3230–3245', session:'London', vol:'Very High', pattern:'Bullish reversal candle at daily support, strong demand zone, London session bias bullish', tf:'H4/H1' },
+  { pair:'GBPAUD', price:'2.0115', chg:'+0.33%', rsi:40, trend:'Downtrend correction', level:'H4 support 2.0080', session:'London', vol:'Medium', pattern:'Pullback to broken resistance, London range breakout potential, aligned with D1 bias', tf:'H1' }
+];
+
+// ═══════════════════════════════════════════
+// BROWSER-SAFE SCANNER
+// Uses local profile-matching logic instead of a server/API call.
+// ═══════════════════════════════════════════
+function priceDecimals(price) {
+  const str = String(price || '');
+  return str.includes('.') ? str.split('.')[1].length : 2;
+}
+
+function makeLevels(market, direction, rrText) {
+  const price = Number(market.price);
+  const decimals = priceDecimals(market.price);
+  const rr = Number(String(rrText || '1:2').split(':')[1]) || 2;
+  const isJpy = market.pair && market.pair.includes('JPY');
+  const isGold = market.pair === 'XAUUSD';
+  const risk = isGold ? 12 : isJpy ? 0.35 : 0.0035;
+  const entry = direction === 'buy' ? price - risk * 0.15 : price + risk * 0.15;
+  const sl = direction === 'buy' ? entry - risk : entry + risk;
+  const tp = direction === 'buy' ? entry + risk * rr : entry - risk * rr;
+  return {
+    entry_price: entry.toFixed(decimals),
+    stop_loss: sl.toFixed(decimals),
+    take_profit: tp.toFixed(decimals),
+    rr_ratio: `1:${rr.toFixed(1)}`
+  };
+}
+
+function directionFromMarket(market) {
+  const text = `${market.trend} ${market.pattern} ${market.level}`.toLowerCase();
+  if (text.includes('bearish') || text.includes('supply') || text.includes('resistance') || text.includes('overbought')) return 'sell';
+  return 'buy';
+}
+
+function localScanResults() {
+  const profile = S.profile || {};
+  const preferred = profile.pairs_preferred || [];
+  const sessions = profile.sessions || [];
+  const profileText = `${profile.entry_style || ''} ${(profile.setup_types || []).join(' ')}`.toLowerCase();
+
+  return MARKETS.map(m => {
+    let score = 48;
+    if (preferred.includes(m.pair)) score += 22;
+    if (sessions.includes(m.session)) score += 12;
+    if ((m.vol || '').toLowerCase().includes('high')) score += 8;
+    if ((m.level || '').toLowerCase().includes('support') || (m.level || '').toLowerCase().includes('resistance')) score += 8;
+    if (profileText.includes('pullback') && (m.pattern || '').toLowerCase().includes('pullback')) score += 10;
+    if (profileText.includes('reversal') && ((m.pattern || '').toLowerCase().includes('reversal') || (m.pattern || '').toLowerCase().includes('rejection'))) score += 10;
+    if (profileText.includes('breakout') && (m.pattern || '').toLowerCase().includes('breakout')) score += 10;
+    score = Math.min(94, Math.round(score));
+
+    const direction = directionFromMarket(m);
+    const levels = makeLevels(m, direction, profile.risk_reward);
+    return {
+      pair: m.pair,
+      match_score: score,
+      direction,
+      setup_type: direction === 'buy' ? 'Pullback to Support' : 'Rejection from Resistance',
+      reasoning: `${m.pair} matches your ${profile.style_name || 'trading'} profile because it combines ${m.session} timing, ${m.level}, and ${m.pattern.toLowerCase()}.`,
+      timeframe: m.tf,
+      key_condition: `${m.level} · RSI ${m.rsi}`,
+      ...levels
+    };
+  }).filter(r => r.match_score > 52).sort((a,b) => b.match_score - a.match_score);
+}
+
+async function runScanner() {
+  if (!S.profile) {
+    document.getElementById('scanner-body').innerHTML = `<div class="empty-state"><h3>No profile to scan against</h3><p>Analyse your trade history first so TradeShadow knows what to look for</p><button class="btn" style="margin-top:22px" onclick="goApp('analyse')">Analyse My Style →</button></div>`;
+    return;
+  }
+  showLoader('Scanning 52 pairs...', 'Matching market conditions to your profile');
+  try {
+    setTimeout(() => {
+      S.results = localScanResults();
+      S.filter = 'all';
+      hideLoader();
+      renderScanner();
+    }, 750);
+  } catch (e) {
+    hideLoader();
+    console.error(e);
+    toast('Scanner error — try again');
+  }
+}
+
+function renderScanner() {
+  const body = document.getElementById('scanner-body');
+  if (!S.results.length) {
+    body.innerHTML = `<div class="empty-state"><h3>No scan results yet</h3><p>Run a scan to find setups matching your style profile</p><button class="btn" style="margin-top:22px" onclick="runScanner()">Run Scanner</button></div>`;
+    return;
+  }
+  const filtered = S.filter === 'all' ? S.results
+    : S.filter === 'buy' ? S.results.filter(r => r.direction === 'buy')
+    : S.filter === 'sell' ? S.results.filter(r => r.direction === 'sell')
+    : S.results.filter(r => r.match_score >= 80);
+
+  const now = new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  const highCount = S.results.filter(r => r.match_score >= 80).length;
+  const buyCount = S.results.filter(r => r.direction === 'buy').length;
+  const sellCount = S.results.filter(r => r.direction === 'sell').length;
+
+  body.innerHTML = `
+    <div class="scanning-banner">
+      <div class="status-dot"></div>
+      <span>Live scan · 52 pairs monitored · ${S.results.length} matches found · Updated ${now}</span>
+    </div>
+    <div class="scanner-filters">
+      <button class="filter-btn ${S.filter==='all'?'active':''}" onclick="setFilter('all')">All Matches (${S.results.length})</button>
+      <button class="filter-btn ${S.filter==='high'?'active':''}" onclick="setFilter('high')">High Match (${highCount})</button>
+      <button class="filter-btn ${S.filter==='buy'?'active':''}" onclick="setFilter('buy')">Buy Setups (${buyCount})</button>
+      <button class="filter-btn ${S.filter==='sell'?'active':''}" onclick="setFilter('sell')">Sell Setups (${sellCount})</button>
+    </div>
+    <div class="scanner-grid">
+      ${filtered.map(r => pairCard(r)).join('')}
+    </div>
+    ${!filtered.length ? '<div class="empty-state"><h3>No matches for this filter</h3><p>Try a different filter or refresh the scan</p></div>' : ''}`;
+}
+
+function pairCard(r) {
+  const high = r.match_score >= 80;
+  const m = MARKETS.find(x => x.pair === r.pair) || {};
+  const chgPos = (m.chg || '').startsWith('+');
+  const isBuy = r.direction === 'buy';
+  return `
+    <div class="pair-card ${high ? 'high-match' : ''}">
+      <div class="pair-card-header">
+        <div>
+          <div class="pair-name">${r.pair}</div>
+          <div class="pair-price">${m.price || '—'} &nbsp;<span style="font-size:10px;color:${chgPos?'var(--green)':'var(--red)'}">${m.chg||''}</span></div>
+        </div>
+        <div class="match-badge ${high?'high':'medium'}">${r.match_score}% match</div>
+      </div>
+
+      <div class="setup-label">
+        <span class="dir-${r.direction}">${isBuy ? '▲' : '▼'}</span>
+        <span>${r.direction.toUpperCase()} · ${r.setup_type}</span>
+      </div>
+
+      <p class="pair-reasoning">${r.reasoning}</p>
+
+      <!-- ENTRY / SL / TP -->
+      <div class="trade-levels">
+        <div class="trade-levels-title">Setup Levels — Based on your style</div>
+        <div class="trade-levels-grid">
+          <div class="level-item">
+            <div class="level-label">Entry</div>
+            <div class="level-value entry">${r.entry_price || '—'}</div>
+          </div>
+          <div class="level-item">
+            <div class="level-label">Stop Loss</div>
+            <div class="level-value sl">${r.stop_loss || '—'}</div>
+          </div>
+          <div class="level-item">
+            <div class="level-label">Take Profit</div>
+            <div class="level-value tp">${r.take_profit || '—'}</div>
+          </div>
+        </div>
+        <div class="rr-badge">R:R ${r.rr_ratio || '—'} · ${r.timeframe}</div>
+      </div>
+
+      <div class="pill-row">
+        ${r.key_condition ? `<span class="pill">${r.key_condition}</span>` : ''}
+        <span class="pill">RSI ${m.rsi||'—'}</span>
+        <span class="pill">${m.session||'Active'}</span>
+        <span class="pill">${m.vol||''} Vol</span>
+      </div>
+      <div class="card-footer">
+        <div class="tf-label" style="font-size:10px;color:var(--text-muted)">Not financial advice · Your decision</div>
+        <button class="btn btn-sm btn-outline" onclick="toast('Full chart view available in production build')">View Chart →</button>
+      </div>
+    </div>`;
+}
+
+function setFilter(f) {
+  S.filter = f;
+  renderScanner();
+}
+
+// ═══════════════════════════════════════════
+// LOADER / TOAST
+// ═══════════════════════════════════════════
+function showLoader(title, sub) {
+  document.getElementById('load-title').textContent = title;
+  document.getElementById('load-sub').textContent = sub;
+  document.getElementById('loading').classList.add('active');
+}
+function hideLoader() {
+  document.getElementById('loading').classList.remove('active');
+}
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+// ═══════════════════════════════════════════
+// INIT — pre-fill login for demo convenience
+// ═══════════════════════════════════════════
+document.getElementById('login-email').value = 'demo@tradeshadow.com';
+document.getElementById('login-pass').value = 'demo1234';
+
+function joinWaitlist() {
+  const email = document.getElementById('waitlist-email').value.trim();
+  if (!email || !email.includes('@')) { toast('Please enter a valid email address'); return; }
+  document.getElementById('waitlist-email').value = '';
+  toast('You\'re on the list — we\'ll be in touch soon');
+}
+
+function scrollPsych(id, el) {
+  document.querySelectorAll('.psych-nav-link').forEach(l => l.classList.remove('active'));
+  el.classList.add('active');
+  const target = document.getElementById(id);
+  if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+function navTo(id) {
+  if (!document.getElementById('view-landing').classList.contains('active')) {
+    showView('landing');
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 120);
+  } else {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+</script>
+</body>
+</html>
