@@ -1,0 +1,53 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.history/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node (if any tooling is added later)
+node_modules/
+package-lock.json
+
+# Local outputs / scratch
+.tmp/
+.cache/
+output/
+outputs/
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# Build artifacts (currently no build step, but in case one is added)
+dist/
+build/
+.next/
+
+# Old / iteration files — keep only index.html in the repo
+index-*.html
+trade_plan*.svg
+trade_plan*.png
+mobile_*.png
+render_test*.js
+end2end_test.js
+journey_test.js
+page_audit.js
+scanner_check.js
+mobile_screenshot.py
+more_screenshots.py
+full_check.py
+find_wide.js
